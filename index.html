@@ -3,439 +3,2069 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Operacional</title>
+<title>UME · Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* ── RESET + SHELL ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f4f5f7; color: #1a1a2e; min-height: 100vh; }
-.container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
-header { margin-bottom: 24px; }
-header h1 { font-size: 20px; font-weight: 600; color: #1a1a2e; }
-header p { font-size: 13px; color: #666; margin-top: 2px; }
-.nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; background: #fff; border-radius: 12px; padding: 10px; border: 1px solid #e8e8ee; }
-.nav-btn { background: transparent; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #666; cursor: pointer; transition: all 0.15s; }
-.nav-btn:hover { background: #f4f5f7; color: #1a1a2e; }
-.nav-btn.active { background: #1a56db; color: #fff; }
-.panel { display: none; }
-.panel.active { display: block; }
-.sec-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #888; margin-bottom: 8px; margin-top: 16px; }
-.sec-sub { font-size: 11px; color: #aaa; margin-top: -6px; margin-bottom: 8px; }
-.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px,1fr)); gap: 8px; margin-bottom: 8px; }
-.card { background: #fff; border: 1.5px solid #e8e8ee; border-radius: 12px; padding: 10px 12px; cursor: pointer; user-select: none; transition: all 0.15s; }
-.card:hover { border-color: #b0c4f8; box-shadow: 0 2px 8px rgba(26,86,219,0.07); }
-.card.selected { border: 2px solid #1a56db; background: #eef3ff; }
-.card.selected .cname { color: #1a56db; }
-.initials { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
-.cname { font-size: 12px; font-weight: 600; color: #1a1a2e; margin-bottom: 2px; line-height: 1.3; }
-.cvals { font-size: 11px; color: #888; line-height: 1.8; }
-.cvals span { display: block; }
-.ctag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 20px; margin-top: 5px; font-weight: 500; }
-.result-box { background: #fff; border: 1px solid #e8e8ee; border-radius: 12px; padding: 18px; margin-top: 8px; }
-.empty { color: #bbb; font-size: 13px; text-align: center; padding: 28px 0; }
-.g2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 12px; }
-.g3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 12px; }
-.g4 { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 12px; }
-.g5 { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; margin-bottom: 14px; }
-.m { border-radius: 10px; padding: 11px 13px; }
-.m .ml { font-size: 11px; margin-bottom: 3px; font-weight: 500; }
-.m .mv { font-size: 17px; font-weight: 600; }
-.mr { background: #fff1f1; } .mr .ml { color: #c0392b; } .mr .mv { color: #922b21; }
-.mg { background: #eafaf1; } .mg .ml { color: #1e8449; } .mg .mv { color: #1a5e36; }
-.mn { background: #f4f5f7; } .mn .ml { color: #888; } .mn .mv { color: #1a1a2e; }
-.mb { background: #eef3ff; } .mb .ml { color: #1a56db; } .mb .mv { color: #1239a0; }
-.team-block { border: 1px solid #e8e8ee; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
-.team-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; }
-.row-item { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid #f0f0f5; font-size:12px; flex-wrap:wrap; gap:4px; }
-.row-item:last-child { border-bottom:none; }
-.row-name { color:#1a1a2e; font-weight:600; }
-.row-vals { display:flex; gap:12px; color:#888; flex-wrap:wrap; font-size:11px; }
-.row-vals b { color:#1a1a2e; font-weight:600; }
-.pct-bar-bg { background: #f0f0f5; border-radius:6px; height:7px; overflow:hidden; margin-top:4px; }
-.pct-bar { height:7px; border-radius:6px; }
-.divider { border:none; border-top:1px solid #f0f0f5; margin:14px 0; }
-.day-card { border-radius:10px; padding:12px 8px; text-align:center; }
-.day-card .dl { font-size:11px; font-weight:600; margin-bottom:4px; }
-.day-card .dv { font-size:15px; font-weight:600; }
-.mini-bar { height:4px; border-radius:2px; margin-top:4px; }
-.op-table { width:100%; border-collapse:collapse; font-size:12px; }
-.op-table th { background:#f9f9fb; padding:8px 10px; text-align:center; font-weight:600; color:#888; font-size:11px; border-bottom:1px solid #eee; }
-.op-table th.left { text-align:left; }
-.op-table td { padding:8px 10px; text-align:right; border-bottom:1px solid #f4f5f7; color:#1a1a2e; }
-.op-table td.left { text-align:left; font-weight:600; }
-.op-table td.center { text-align:center; }
-.op-table tr:last-child td { border-bottom:none; }
-.badge-up { display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; background:#eafaf1; color:#1e8449; font-weight:600; }
-.badge-dn { display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; background:#fff1f1; color:#c0392b; font-weight:600; }
-.badge-eq { display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; background:#f4f5f7; color:#888; }
-.badge-desl { display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; background:#fff1f1; color:#c0392b; font-weight:600; }
-.badge-new { display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; background:#eef3ff; color:#1a56db; font-weight:600; }
-.hslider-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; background:#f9f9fb; border-radius:10px; padding:10px 14px; }
-input[type=range] { accent-color: #1a56db; }
+:root {
+  /* Ume brand */
+  --ume-green:    #14cb53;
+  --ume-green-dk: #0fa642;
+  --ume-dark:     #00170d;
+
+  /* Surfaces */
+  --bg:      #0d0d0d;
+  --s1:      #141414;
+  --s2:      #1a1a1a;
+  --s3:      #212121;
+  --s4:      #2a2a2a;
+
+  /* Borders */
+  --bd:      rgba(255,255,255,0.08);
+  --bd2:     rgba(255,255,255,0.14);
+  --bd3:     rgba(255,255,255,0.22);
+
+  /* Text */
+  --t1:      #ffffff;
+  --t2:      #d1d5db;
+  --t3:      #9ca3af;
+  --t4:      #6b7280;
+
+  /* Accent */
+  --ac:      #14cb53;
+  --ac2:     rgba(20,203,83,0.12);
+  --ac3:     rgba(20,203,83,0.06);
+
+  /* Semantic */
+  --red:     #f87171;
+  --red-bg:  rgba(248,113,113,0.1);
+  --red-bd:  rgba(248,113,113,0.25);
+  --yel:     #fbbf24;
+  --yel-bg:  rgba(251,191,36,0.1);
+  --yel-bd:  rgba(251,191,36,0.25);
+  --grn:     #14cb53;
+  --grn-bg:  rgba(20,203,83,0.1);
+  --grn-bd:  rgba(20,203,83,0.25);
+  --blu:     #60a5fa;
+  --blu-bg:  rgba(96,165,250,0.1);
+  --blu-bd:  rgba(96,165,250,0.25);
+  --pur:     #c084fc;
+  --pur-bg:  rgba(192,132,252,0.1);
+  --pur-bd:  rgba(192,132,252,0.25);
+}
+body { font-family: 'Inter', sans-serif; background: #0d0d0d; color: #ffffff; min-height: 100vh; display: flex; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px;
+  background: var(--ume-dark);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  border-right: 1px solid rgba(20,203,83,0.12);
+  z-index: 200;
+  transform: translateX(0);
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+.sidebar.collapsed {
+  transform: translateX(-220px);
+}
+
+/* Hamburger button — always visible */
+.sb-hamburger {
+  position: fixed;
+  top: 16px; left: 16px;
+  z-index: 300;
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: var(--ume-dark);
+  border: 1px solid rgba(20,203,83,0.2);
+  cursor: pointer;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: background .15s;
+}
+.sb-hamburger:hover { background: rgba(20,203,83,0.12); }
+.sb-hamburger span {
+  display: block;
+  width: 18px; height: 2px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 2px;
+  transition: background .15s;
+}
+.sb-hamburger:hover span { background: #fff; }
+.sidebar.collapsed ~ .main .sb-hamburger,
+.sidebar.collapsed + .main .sb-hamburger { display: flex; }
+
+/* show hamburger when collapsed */
+.hamburger-visible { display: flex !important; }
+
+.sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 220px;
+}
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+.logo-wrap { overflow: hidden; flex: 1; }
+.logo-text { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px; white-space: nowrap; }
+.logo-text span { color: var(--ume-green); }
+.logo-sub { font-size: 9px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: .1em; margin-top: 2px; }
+.sb-toggle {
+  width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0; margin-left: 8px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.5); font-size: 13px; transition: all .15s; line-height: 1;
+}
+.sb-toggle:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.sb-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; padding: 10px 8px; }
+.sb-btn {
+  position: relative;
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 10px; border-radius: 8px;
+  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5);
+  background: transparent; border: none; cursor: pointer;
+  transition: all .15s; text-align: left; white-space: nowrap; width: 100%;
+}
+.sb-btn:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+.sb-btn.active { background: rgba(20,203,83,0.13); color: var(--ume-green); }
+.sb-btn.active::before {
+  content: ''; position: absolute; left: 0; top: 6px; bottom: 6px;
+  width: 3px; background: var(--ume-green); border-radius: 0 2px 2px 0;
+}
+.sb-icon { font-size: 16px; flex-shrink: 0; width: 20px; text-align: center; }
+.sb-label { flex: 1; line-height: 1.3; }
+.sb-sub { font-size: 10px; color: rgba(255,255,255,0.28); display: block; margin-top: 1px; }
+.sb-btn.active .sb-sub { color: rgba(20,203,83,0.55); }
+.dev-credit {
+  padding: 14px 16px; font-size: 10px; color: rgba(255,255,255,0.2);
+  line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.06); white-space: nowrap;
+}
+.dev-credit a { color: var(--ume-green); text-decoration: none; }
+.dev-credit a:hover { color: #4ade80; }
+
+/* Overlay when sidebar open on top of content */
+.sb-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 199;
+}
+.sb-overlay.visible { display: block; }
+
+/* Main shifts right when sidebar is open */
+
+.sidebar.collapsed ~ .main { margin-left: 0; }
+
+/* ── APP PANELS ── */
+.main { flex: 1; overflow: auto; min-width: 0; margin-left: 220px; transition: margin-left .25s cubic-bezier(.4,0,.2,1); }
+.app-panel { display: none !important; min-height: 100vh; }
+.app-panel.active { display: block !important; }
+
+/* ── PAINEL OPERACIONAL CSS (scoped) ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+#app-painel {
+  --bg:#0d0d0d; --surface:#141414; --surface2:#1a1a1a;
+  --border:rgba(255,255,255,0.08); --text:#141414; --text-muted:#9ca3af; --text-dim:#6b7280;
+  --accent:#14cb53; --accent-glow:rgba(20,203,83,0.15);
+  --green:#14cb53; --green-glow:rgba(20,203,83,0.12);
+  --red:#f87171; --red-glow:rgba(248,113,113,0.1); --purple:#c084fc;
+}
+#app-painel { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background:#0d0d0d; }
+
+#app-painel .logo-wrap { margin-bottom: auto; }
+#app-painel .logo-text {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+#app-painel .logo-text span { color: #14cb53; }
+#app-painel .logo-sub { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+#app-painel .dev-credit { margin-top: 24px; font-size: 10px; color: #9ca3af; line-height: 1.5; }
+#app-painel .dev-credit a { color: #14cb53; text-decoration: none; transition: color 0.15s; }
+#app-painel .dev-credit a:hover { color: #93c5fd; text-decoration: underline; }
+#app-painel /* MAIN */
+.main { flex: 1; padding: 28px 24px; overflow: auto; }
+#app-painel .container { max-width: 1100px; margin: 0 auto; }
+#app-painel header { margin-bottom: 24px; }
+#app-painel header h1 { font-size: 20px; font-weight: 600; color: #f3f4f6; }
+#app-painel header p { font-size: 13px; color: #9ca3af; margin-top: 2px; }
+#app-painel .nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; background: #141414; border-radius: 12px; padding: 8px; border: 1px solid rgba(255,255,255,0.08); }
+#app-painel .nav-btn { background: transparent; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #9ca3af; cursor: pointer; transition: all 0.15s; }
+#app-painel .nav-btn:hover { background: #1a1a1a; color: #f3f4f6; }
+#app-painel .nav-btn.active { background: #14cb53; color: #f3f4f6; font-weight: 600; box-shadow: 0 0 16px rgba(20,203,83,.25); }
+#app-painel .panel { display: none; }
+#app-painel .panel.active { display: block; }
+#app-painel .sec-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #9ca3af; margin-bottom: 8px; margin-top: 16px; }
+#app-painel .sec-sub { font-size: 11px; color: #9ca3af; margin-top: -6px; margin-bottom: 8px; opacity: 0.7; }
+#app-painel .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px,1fr)); gap: 8px; margin-bottom: 8px; }
+#app-painel .card { background: #141414; border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 12px; cursor: pointer; user-select: none; transition: all 0.15s; }
+#app-painel .card:hover { border-color: #14cb53; box-shadow: 0 0 12px rgba(20,203,83,0.2); }
+#app-painel .card.selected { border: 2px solid #14cb53; background: #1a1a1a; box-shadow: 0 0 16px rgba(20,203,83,0.2); }
+#app-painel .card.selected .cname { color: #14cb53; }
+#app-painel .initials { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+#app-painel .cname { font-size: 12px; font-weight: 600; color: #f3f4f6; margin-bottom: 2px; line-height: 1.3; }
+#app-painel .cvals { font-size: 11px; color: #9ca3af; line-height: 1.8; }
+#app-painel .cvals span { display: block; }
+#app-painel .ctag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 20px; margin-top: 5px; font-weight: 500; }
+#app-painel .result-box { background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; margin-top: 8px; }
+#app-painel .empty { color: #9ca3af; font-size: 13px; text-align: center; padding: 28px 0; }
+#app-painel .g2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 12px; }
+#app-painel .g3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 12px; }
+#app-painel .g4 { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 12px; }
+#app-painel .g5 { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; margin-bottom: 14px; }
+#app-painel .m { border-radius: 10px; padding: 11px 13px; }
+#app-painel .m .ml { font-size: 11px; margin-bottom: 3px; font-weight: 500; }
+#app-painel .m .mv { font-size: 17px; font-weight: 600; }
+#app-painel .mr { background: var(--red-glow); border: 1px solid rgba(239,68,68,0.2); }
+#app-painel .mr .ml { color: #f87171; }
+#app-painel .mr .mv { color: #fca5a5; }
+#app-painel .mg { background: rgba(20,203,83,0.15); border: 1px solid rgba(16,185,129,0.2); }
+#app-painel .mg .ml { color: #34d399; }
+#app-painel .mg .mv { color: #6ee7b7; }
+#app-painel .mn { background: #1a1a1a; border: 1px solid rgba(255,255,255,0.08); }
+#app-painel .mn .ml { color: #9ca3af; }
+#app-painel .mn .mv { color: #f3f4f6; }
+#app-painel .mb { background: rgba(20,203,83,0.2); border: 1px solid rgba(59,130,246,0.2); }
+#app-painel .mb .ml { color: #60a5fa; }
+#app-painel .mb .mv { color: #14cb53; }
+#app-painel .team-block { border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; margin-bottom: 12px; background: #141414; }
+#app-painel .team-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+#app-painel .row-item { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.08); font-size:12px; flex-wrap:wrap; gap:4px; }
+#app-painel .row-item:last-child { border-bottom:none; }
+#app-painel .row-name { color:#f3f4f6; font-weight:600; }
+#app-painel .row-vals { display:flex; gap:12px; color:#9ca3af; flex-wrap:wrap; font-size:11px; }
+#app-painel .row-vals b { color:#f3f4f6; font-weight:600; }
+#app-painel .pct-bar-bg { background: rgba(255,255,255,0.08); border-radius:6px; height:7px; overflow:hidden; margin-top:4px; }
+#app-painel .pct-bar { height:7px; border-radius:6px; }
+#app-painel .divider { border:none; border-top:1px solid rgba(255,255,255,0.08); margin:14px 0; }
+#app-painel .day-card { border-radius:10px; padding:12px 8px; text-align:center; }
+#app-painel .day-card .dl { font-size:11px; font-weight:600; margin-bottom:4px; }
+#app-painel .day-card .dv { font-size:15px; font-weight:600; }
+#app-painel .mini-bar { height:4px; border-radius:2px; margin-top:4px; }
+#app-painel .op-table { width:100%; border-collapse:collapse; font-size:12px; }
+#app-painel .op-table th { background:#1a1a1a; padding:8px 10px; text-align:center; font-weight:600; color:#9ca3af; font-size:11px; border-bottom:1px solid rgba(255,255,255,0.08); }
+#app-painel .op-table th.left { text-align:left; }
+#app-painel .op-table td { padding:8px 10px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.08); color:#f3f4f6; }
+#app-painel .op-table td.left { text-align:left; font-weight:600; }
+#app-painel .op-table td.center { text-align:center; }
+#app-painel .op-table tr:last-child td { border-bottom:none; }
+#app-painel .op-table tr:hover td { background: #1a1a1a; }
+#app-painel .badge-up { display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; background:rgba(20,203,83,0.15); color:#34d399; font-weight:600; border:1px solid rgba(16,185,129,0.2); }
+#app-painel .badge-dn { display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; background:var(--red-glow); color:#f87171; font-weight:600; border:1px solid rgba(239,68,68,0.2); }
+#app-painel .badge-eq { display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; background:#1a1a1a; color:#9ca3af; border:1px solid rgba(255,255,255,0.08); }
+#app-painel .badge-desl { display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; background:var(--red-glow); color:#f87171; font-weight:600; border:1px solid rgba(239,68,68,0.2); }
+#app-painel .badge-new { display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; background:rgba(20,203,83,0.2); color:#60a5fa; font-weight:600; border:1px solid rgba(59,130,246,0.2); }
+#app-painel .hslider-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; background:#1a1a1a; border-radius:10px; padding:10px 14px; border:1px solid rgba(255,255,255,0.08); }
+#app-painel input[type=range] { accent-color: #14cb53; }
+#app-painel /* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+#app-painel ::-webkit-scrollbar-track { background: #0d0d0d; }
+#app-painel ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+#app-painel ::-webkit-scrollbar-thumb:hover { background: #14cb53; }
+
+/* ── ANÁLISE DISCADOR CSS (scoped) ── */
+#app-discador {
+  --bg:#0d0f14;--bg2:#13161e;--bg3:#1a1e28;--bg4:#212636;--bg5:#272c3d;
+  --border:#252a38;--border2:#323748;
+  --text:#e8eaf0;--text2:#9ba3b8;--text3:#5a6178;
+  --accent:#4f7cff;--accent2:rgba(79,124,255,.12);
+  --green:#22c55e;--gbg:#0b1f12;--gbd:#15472a;
+  --yellow:#f59e0b;--ybg:#1e1505;--ybd:#6b4009;
+  --red:#ef4444;--rbg:#1c0a0a;--rbd:#6b1c1c;
+  --purple:#a855f7;--pbg:#150d1f;--pbd:#4a1f7a;
+  --r:10px;--rs:6px;
+}
+#app-discador {font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;}
+#app-discador /* ── HEADER ── */
+.hdr {background:#141414;border-bottom:1px solid rgba(255,255,255,0.08);padding:0 36px;display:flex;align-items:center;gap:14px;height:56px;position:sticky;top:0;z-index:300}
+#app-discador .logo {font-size:21px;font-weight:700;letter-spacing:-.5px}
+#app-discador .logo span {color:#14cb53}
+#app-discador .hdr-sep {width:1px;height:22px;background:rgba(255,255,255,0.14)}
+#app-discador .hdr-lbl {font-size:13px;color:#d1d5db}
+#app-discador .chip {background:#212121;border:1px solid rgba(255,255,255,0.14);color:#d1d5db;font-size:11px;padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;margin-left:auto}
+#app-discador .chip.ac {color:#14cb53;border-color:rgba(79,124,255,.3);background:rgba(79,124,255,.08)}
+#app-discador /* ── NAV DUAL ── */
+.nav-wrap {background:#141414;border-bottom:1px solid rgba(255,255,255,0.08);padding:12px 36px;display:flex;flex-direction:column;gap:10px}
+#app-discador .nav-row {display:flex;gap:8px;align-items:center}
+#app-discador .nav-label {font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.5px;min-width:64px}
+#app-discador .nbtn {display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:6px;font-size:13px;font-weight:500;color:#d1d5db;background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:all .15s;white-space:nowrap}
+#app-discador .nbtn:hover {border-color:rgba(255,255,255,0.14);color:#f3f4f6}
+#app-discador .nbtn.active {background:rgba(20,203,83,0.12);border-color:#14cb53;color:#f3f4f6}
+#app-discador .nbtn .dot {width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.5}
+#app-discador .nbtn.active .dot {opacity:1}
+#app-discador .period-note {font-size:11px;color:#9ca3af;font-family:'DM Mono',monospace;padding:4px 10px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);border-radius:6px}
+#app-discador /* ── CONTAINER ── */
+.wrap {max-width:1200px;margin:0 auto;padding:32px 32px 100px}
+#app-discador /* ── SECTION ── */
+.sec {margin-bottom:48px}
+#app-discador .sec-hd {display:flex;align-items:center;gap:12px;margin-bottom:18px}
+#app-discador .sec-hd h2 {font-size:15px;font-weight:600;white-space:nowrap}
+#app-discador .sec-hd::after {content:'';flex:1;height:1px;background:rgba(255,255,255,0.08)}
+#app-discador .divider {height:1px;background:rgba(255,255,255,0.08);margin:40px 0}
+#app-discador .sub-title {font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+#app-discador .sub-title::after {content:'';flex:1;height:1px;background:rgba(255,255,255,0.08)}
+#app-discador /* ── EXEC BOX ── */
+.exec-box {background:linear-gradient(135deg,rgba(20,203,83,.06),rgba(20,203,83,.02));border:1px solid rgba(20,203,83,.2);border-radius:10px;padding:22px 26px;margin-bottom:32px}
+#app-discador .exec-box h3 {font-size:11px;font-weight:600;color:#14cb53;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+#app-discador .exec-box p {font-size:14px;color:#d1d5db;line-height:1.75}
+#app-discador .exec-box strong {color:#f3f4f6}
+#app-discador .r {color:#f87171;font-weight:600}
+#app-discador .g {color:#14cb53;font-weight:600}
+#app-discador .y {color:#fbbf24;font-weight:600}
+#app-discador /* ── SEMAPHORE ── */
+.sem-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:11px;margin-bottom:20px}
+#app-discador .sem-card {background:#141414;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden}
+#app-discador .sem-card::before {content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0}
+#app-discador .sem-card.green::before {background:#14cb53}
+#app-discador .sem-card.yellow::before {background:#fbbf24}
+#app-discador .sem-card.red::before {background:#f87171}
+#app-discador .sem-card.gray::before {background:#9ca3af}
+#app-discador .sem-lbl {font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+#app-discador .sem-val {font-size:28px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-1.5px;line-height:1;margin-bottom:5px}
+#app-discador .sem-card.green .sem-val {color:#14cb53}
+#app-discador .sem-card.yellow .sem-val {color:#fbbf24}
+#app-discador .sem-card.red .sem-val {color:#f87171}
+#app-discador .sem-card.gray .sem-val {color:#d1d5db}
+#app-discador .sem-row {display:flex;align-items:center;justify-content:space-between;gap:6px}
+#app-discador .sem-delta {font-size:11px;font-family:'DM Mono',monospace}
+#app-discador .sem-delta.up {color:#14cb53}
+#app-discador .sem-delta.dn {color:#f87171}
+#app-discador .sem-delta.fl {color:#9ca3af}
+#app-discador .sem-bench {font-size:10px;color:#9ca3af;margin-top:5px}
+#app-discador .badge {display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+#app-discador .bg {background:rgba(20,203,83,0.1);color:#14cb53;border:1px solid rgba(20,203,83,0.25)}
+#app-discador .by {background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.25)}
+#app-discador .br {background:rgba(248,113,113,0.1);color:#f87171;border:1px solid rgba(248,113,113,0.25)}
+#app-discador .bb {background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.25)}
+#app-discador .bgr {background:#212121;color:#d1d5db;border:1px solid rgba(255,255,255,0.14)}
+#app-discador .bp {background:rgba(192,132,252,0.1);color:#c084fc;border:1px solid rgba(192,132,252,0.25)}
+#app-discador /* ── TABLES ── */
+.tbl-wrap {overflow-x:auto;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:#141414;margin:12px 0}
+#app-discador table {width:100%;border-collapse:collapse;font-size:13px}
+#app-discador thead tr {background:#1a1a1a;border-bottom:1px solid rgba(255,255,255,0.08)}
+#app-discador th {padding:10px 14px;text-align:left;font-weight:600;color:#d1d5db;font-size:11px;letter-spacing:.3px;white-space:nowrap}
+#app-discador td {padding:9px 14px;border-bottom:1px solid rgba(255,255,255,0.08);color:#f3f4f6;font-family:'DM Mono',monospace;font-size:12px}
+#app-discador tr:last-child td {border-bottom:none}
+#app-discador tbody tr:hover {background:#1a1a1a}
+#app-discador td.lbl {font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500}
+#app-discador .cup {color:#14cb53}
+#app-discador .cdn {color:#f87171}
+#app-discador .cfl {color:#d1d5db}
+#app-discador .cwn {color:#fbbf24;font-weight:600}
+#app-discador .ccr {color:#f87171;font-weight:600}
+#app-discador .cok {color:#14cb53;font-weight:600}
+#app-discador tr.hl-r td {background:rgba(239,68,68,.04)}
+#app-discador tr.hl-y td {background:rgba(245,158,11,.04)}
+#app-discador tr.hl-g td {background:rgba(34,197,94,.04)}
+#app-discador tr.tot td {background:#1a1a1a;font-weight:700}
+#app-discador /* ── ALERT CARDS ── */
+.alert {background:#141414;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:22px;margin-bottom:14px;position:relative;overflow:hidden}
+#app-discador .alert::before {content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+#app-discador .alert.cr::before {background:#f87171}
+#app-discador .alert.wn::before {background:#fbbf24}
+#app-discador .alert.ok::before {background:#14cb53}
+#app-discador .alert.inf::before {background:#60a5fa}
+#app-discador .al-hd {display:flex;align-items:flex-start;gap:11px;margin-bottom:14px}
+#app-discador .al-icon {font-size:19px;flex-shrink:0;margin-top:2px}
+#app-discador .al-title {font-size:15px;font-weight:700;letter-spacing:-.2px}
+#app-discador .al-sub {font-size:11px;color:#d1d5db;margin-top:3px}
+#app-discador .fact {background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:13px 15px;font-size:13px;color:#d1d5db;line-height:1.7;margin:12px 0}
+#app-discador .fact strong {color:#f3f4f6}
+#app-discador .fact .neg {color:#f87171;font-weight:600}
+#app-discador .fact em {color:#14cb53;font-style:normal;font-weight:600}
+#app-discador .p5t {font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px}
+#app-discador .p5 {list-style:none;counter-reset:p5}
+#app-discador .p5 li {counter-increment:p5;display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:12px;color:#d1d5db;line-height:1.5}
+#app-discador .p5 li:last-child {border-bottom:none}
+#app-discador .p5 li::before {content:counter(p5);min-width:20px;height:20px;background:#212121;border:1px solid rgba(255,255,255,0.14);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#9ca3af;flex-shrink:0;margin-top:1px;font-family:'DM Mono',monospace}
+#app-discador .arr {color:#14cb53;font-weight:700;margin:0 2px}
+#app-discador /* ── INSIGHT CARDS ── */
+.ins-grid {display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:800px) {.ins-grid{grid-template-columns:1fr}}
+#app-discador .ins {background:#141414;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:18px}
+#app-discador .ins-hd {display:flex;align-items:center;gap:8px;margin-bottom:10px}
+#app-discador .ins-num {width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;flex-shrink:0}
+#app-discador .ins-num.p {background:rgba(192,132,252,0.1);color:#c084fc;border:1px solid rgba(192,132,252,0.25)}
+#app-discador .ins-num.b {background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.25)}
+#app-discador .ins-title {font-size:13px;font-weight:600}
+#app-discador .ins-body {font-size:12px;color:#d1d5db;line-height:1.65}
+#app-discador .ins-body strong {color:#f3f4f6}
+#app-discador /* ── HEATMAP ── */
+.view-pills {display:flex;gap:6px;margin-bottom:14px}
+#app-discador .vpill {padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);color:#d1d5db;transition:all .15s}
+#app-discador .vpill.active {background:rgba(20,203,83,0.12);border-color:#14cb53;color:#f3f4f6}
+#app-discador .hm-sum {display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:14px}
+#app-discador .hms {background:#141414;border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:11px 13px}
+#app-discador .hms-lbl {font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+#app-discador .hms-val {font-size:18px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-1px}
+#app-discador .hms-sub {font-size:10px;color:#d1d5db;margin-top:3px;font-family:'DM Mono',monospace}
+#app-discador .hms-bars {margin-top:7px;display:flex;flex-direction:column;gap:3px}
+#app-discador .hms-bar {padding:2px 7px;border-radius:3px;font-size:10px;font-family:'DM Mono',monospace}
+#app-discador .hm-wrap {overflow-x:auto}
+#app-discador .hmt {border-collapse:collapse;font-size:11px}
+#app-discador .hmt th {padding:6px 10px;text-align:center;color:#9ca3af;font-weight:600;white-space:nowrap;background:#1a1a1a;border:1px solid rgba(255,255,255,0.08)}
+#app-discador .hmt td {padding:6px 10px;text-align:center;border:1px solid rgba(255,255,255,0.08);font-family:'DM Mono',monospace;font-size:11px}
+#app-discador .hmt td.lbl {text-align:left;font-family:'DM Sans',monospace;font-weight:500;color:#d1d5db;background:#1a1a1a;white-space:nowrap;padding:6px 13px;font-size:12px}
+#app-discador .hg {background:rgba(34,197,94,.14);color:#4ade80}
+#app-discador .hy {background:rgba(245,158,11,.14);color:#fbbf24}
+#app-discador .hr {background:rgba(239,68,68,.14);color:#f87171}
+#app-discador .hgr {background:#1a1a1a;color:#9ca3af}
+#app-discador .fact-note {background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:11px 14px;font-size:12px;color:#d1d5db;line-height:1.6;margin-top:12px}
+#app-discador .fact-note strong {color:#f3f4f6}
+#app-discador /* ── PROJEÇÃO ── */
+.proj {background:#141414;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:700px) {.proj{grid-template-columns:1fr}}
+#app-discador .proj-i {text-align:center}
+#app-discador .proj-l {font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+#app-discador .proj-v {font-size:20px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-.5px}
+#app-discador .proj-s {font-size:10px;color:#d1d5db;margin-top:4px}
+#app-discador /* ── CHECKLIST ── */
+.cl-section {margin-bottom:10px}
+#app-discador .cl-item {position:relative;display:flex;align-items:flex-start;gap:12px;padding:11px 15px;background:#141414;border:1px solid rgba(255,255,255,0.08);border-radius:6px;margin-bottom:6px;transition:all .2s;cursor:default}
+#app-discador .cl-item.done {opacity:.5}
+#app-discador .cl-item.done .cl-text {text-decoration:line-through;color:#9ca3af}
+#app-discador .cl-cb {width:18px;height:18px;border:2px solid rgba(255,255,255,0.14);border-radius:4px;flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;background:transparent}
+#app-discador .cl-cb:hover {border-color:#14cb53}
+#app-discador .cl-cb.checked {background:#14cb53;border-color:#14cb53}
+#app-discador .cl-cb.checked::after {content:'✓';font-size:11px;color:#fff;font-weight:700}
+#app-discador .cl-text {font-size:13px;color:#d1d5db;line-height:1.5;flex:1}
+#app-discador .cl-tag {font-size:10px;font-weight:600;padding:1px 7px;border-radius:4px;margin-left:6px;white-space:nowrap;flex-shrink:0}
+#app-discador .cl-tag.u {background:rgba(248,113,113,0.1);color:#f87171;border:1px solid rgba(248,113,113,0.25)}
+#app-discador .cl-tag.m {background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.25)}
+#app-discador .cl-tag.ok {background:rgba(20,203,83,0.1);color:#14cb53;border:1px solid rgba(20,203,83,0.25)}
+#app-discador /* comment bubble */
+.cl-comment-wrap {position:relative;margin-top:0}
+#app-discador .cl-comment-icon {width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,0.14);background:#1a1a1a;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:11px;flex-shrink:0;transition:all .15s;margin-top:2px}
+#app-discador .cl-comment-icon:hover {border-color:#14cb53;background:rgba(20,203,83,0.12)}
+#app-discador .cl-comment-icon.has-comment {display:flex;border-color:#14cb53;color:#14cb53}
+#app-discador .cl-popover {display:none;position:absolute;right:0;top:28px;width:280px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:12px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:200}
+#app-discador .cl-popover.open {display:block}
+#app-discador .cl-popover-lbl {font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+#app-discador .cl-popover-text {font-size:12px;color:#d1d5db;line-height:1.6;white-space:pre-wrap}
+#app-discador .cl-popover-input {width:100%;background:#212121;border:1px solid rgba(255,255,255,0.14);border-radius:6px;color:#f3f4f6;font-size:12px;font-family:'DM Sans',sans-serif;padding:8px 10px;resize:vertical;min-height:70px;outline:none;transition:border-color .15s}
+#app-discador .cl-popover-input:focus {border-color:#14cb53}
+#app-discador .cl-popover-actions {display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
+#app-discador .cl-save-btn {padding:5px 14px;background:#14cb53;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s}
+#app-discador .cl-save-btn:hover {opacity:.85}
+#app-discador .cl-cancel-btn {padding:5px 14px;background:#2a2a2a;border:1px solid rgba(255,255,255,0.14);border-radius:6px;color:#d1d5db;font-size:12px;cursor:pointer}
+#app-discador /* scrollbar */
+::-webkit-scrollbar {width:5px;height:5px}
+#app-discador ::-webkit-scrollbar-track {background:#0d0d0d}
+#app-discador ::-webkit-scrollbar-thumb {background:rgba(255,255,255,0.14);border-radius:3px}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0d0d0d; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #14cb53; }
+
+/* ── URA SHELL ── */
+.ura-shell { display:flex; flex-direction:column; min-height:100vh; background:#0d0d0d; }
+.ura-subnav {
+  display:flex; gap:2px; background:#141414; border-bottom:1px solid rgba(255,255,255,0.08);
+  padding:8px 12px; overflow-x:auto;
+}
+.ura-tab {
+  display:flex; flex-direction:column; align-items:flex-start;
+  padding:8px 16px; border-radius:8px;
+  font-size:13px; font-weight:500; color:#9ca3af;
+  background:transparent; border:1px solid transparent;
+  cursor:pointer; transition:all .15s; white-space:nowrap;
+}
+.ura-tab span { font-size:10px; color:#6b7280; margin-top:2px; font-weight:400; }
+.ura-tab:hover { background:#1a1a1a; color:#f3f4f6; }
+.ura-tab.active { background:rgba(59,130,246,.12); border-color:#14cb53; color:#93c5fd; }
+.ura-tab.active span { color:rgba(147,197,253,.6); }
+.ura-body { flex:1; padding:28px 32px 60px; font-family:'DM Sans',sans-serif; background:#0d0d0d; }
+
+/* URA METRICS */
+.ura-title { font-size:22px; font-weight:700; letter-spacing:-.5px; margin-bottom:4px; color:#f3f4f6; }
+.ura-subtitle { font-size:13px; color:#9ca3af; margin-bottom:28px; }
+.ura-kpi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:10px; margin-bottom:28px; }
+.ura-kpi { background:#141414; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px; }
+.ura-kpi-l { font-size:10px; color:#9ca3af; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+.ura-kpi-v { font-size:26px; font-weight:700; font-family:"DM Mono",monospace; letter-spacing:-1px; line-height:1; }
+.ura-kpi-v.green { color:#14cb53; } .ura-kpi-v.red { color:#f87171; }
+.ura-kpi-v.yellow { color:#fbbf24; } .ura-kpi-v.blue { color:#60a5fa; }
+.ura-kpi-v.white { color:#f3f4f6; }
+.ura-kpi-s { font-size:11px; color:#9ca3af; margin-top:5px; font-family:"DM Mono",monospace; }
+
+/* URA SECTIONS */
+.ura-sec { margin-bottom:36px; }
+.ura-sec-title {
+  font-size:14px; font-weight:600; color:#e2e8f0; margin-bottom:14px;
+  display:flex; align-items:center; gap:10px;
+}
+.ura-sec-title::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.07); }
+
+/* FUNNEL */
+.ura-funnel { display:flex; flex-direction:column; gap:6px; }
+.ura-funnel-row {
+  display:flex; align-items:center; gap:12px;
+  background:#141414; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 16px;
+}
+.ura-funnel-label { font-size:13px; font-weight:600; color:#f3f4f6; min-width:100px; }
+.ura-funnel-bar-wrap { flex:1; background:#2a2a2a; border-radius:4px; height:8px; overflow:hidden; }
+.ura-funnel-bar { height:100%; border-radius:4px; transition:width .4s; }
+.ura-funnel-val { font-size:12px; font-family:"DM Mono",monospace; color:#f3f4f6; font-weight:600; min-width:60px; text-align:right; }
+.ura-funnel-pct { font-size:11px; font-family:"DM Mono",monospace; color:#9ca3af; min-width:45px; text-align:right; }
+
+/* CHART (CSS bars) */
+.ura-chart { overflow-x:auto; }
+.ura-chart-inner { display:flex; gap:4px; align-items:flex-end; min-width:max-content; padding-bottom:24px; position:relative; }
+.ura-bar-col { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.ura-bar { width:22px; border-radius:3px 3px 0 0; transition:height .3s; cursor:pointer; }
+.ura-bar:hover { opacity:.8; }
+.ura-bar-lbl { font-size:9px; color:#9ca3af; writing-mode:vertical-lr; transform:rotate(180deg); white-space:nowrap; }
+.ura-bar-val { font-size:9px; color:#d1d5db; font-family:"DM Mono",monospace; }
+
+/* STATUS DONUT (CSS) */
+.ura-status-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.ura-status-item {
+  display:flex; align-items:center; gap:10px;
+  background:#141414; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 14px;
+}
+.ura-status-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.ura-status-label { font-size:12px; color:#d1d5db; flex:1; }
+.ura-status-n { font-size:13px; font-weight:600; font-family:"DM Mono",monospace; color:#f3f4f6; }
+.ura-status-pct { font-size:11px; color:#9ca3af; font-family:"DM Mono",monospace; margin-left:4px; }
+
+/* GROUPS */
+.ura-group-item { margin-bottom:10px; }
+.ura-group-head { display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; }
+.ura-group-name { color:#d1d5db; }
+.ura-group-val { color:#f3f4f6; font-family:"DM Mono",monospace; font-weight:600; }
+.ura-group-bar-bg { background:#2a2a2a; border-radius:4px; height:6px; }
+.ura-group-bar-fill { height:100%; border-radius:4px; background:#14cb53; }
+
+/* INSIGHT CARDS */
+.ura-insights { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media(max-width:900px){ .ura-insights { grid-template-columns:1fr; } }
+.ura-ins { background:#141414; border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:18px; }
+.ura-ins-head { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.ura-ins-icon { font-size:18px; }
+.ura-ins-title { font-size:13px; font-weight:600; color:#f3f4f6; }
+.ura-ins-body { font-size:12px; color:#d1d5db; line-height:1.65; }
+.ura-ins-body strong { color:#f3f4f6; }
+.ura-ins-body .hi-g { color:#14cb53; font-weight:600; }
+.ura-ins-body .hi-r { color:#f87171; font-weight:600; }
+.ura-ins-body .hi-y { color:#fbbf24; font-weight:600; }
+
+/* DAILY TABLE */
+.ura-daily-wrap { overflow-x:auto; border-radius:8px; border:1px solid rgba(255,255,255,0.08); }
+.ura-daily table { width:100%; border-collapse:collapse; font-size:12px; }
+.ura-daily th { padding:8px 12px; background:#1a1a1a; color:#9ca3af; font-size:11px; font-weight:600; text-align:left; white-space:nowrap; border-bottom:1px solid #1e2d45; }
+.ura-daily td { padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-family:"DM Mono",monospace; color:#f3f4f6; }
+.ura-daily tr:last-child td { border-bottom:none; }
+.ura-daily tbody tr:hover { background:#1a1a1a; }
+.ura-daily td.lbl { font-family:"DM Sans",sans-serif; font-weight:500; }
+.ura-daily td.hi { color:#14cb53; } .ura-daily td.lo { color:#f87171; }
+
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Painel Operacional</h1>
-    <p>Base: Fevereiro + Março 2026</p>
-  </header>
 
-  <div class="nav">
-    <button class="nav-btn active" onclick="showPanel('perda',this)">Perda por Ausência</button>
-    <button class="nav-btn" onclick="showPanel('medias',this)">Médias Fev+Mar</button>
-    <button class="nav-btn" onclick="showPanel('semana',this)">Produção por Dia</button>
-    <button class="nav-btn" onclick="showPanel('mes',this)">Mês a Mês</button>
-  </div>
-
-  <!-- P1: PERDA -->
-  <div class="panel active" id="panel-perda">
-    <div style="font-size:12px;color:#888;margin-bottom:10px;">Selecione os operadores ausentes</div>
-    <div class="sec-label" style="color:#1a56db;">UME — Discador</div><div class="grid-cards" id="p1-ume-disc"></div>
-    <div class="sec-label" style="color:#1a56db;">UME — Jovem Aprendiz</div><div class="sec-sub">Ter–Sex</div><div class="grid-cards" id="p1-ume-ja"></div>
-    <div class="sec-label" style="color:#7f56d9;">UME — WhatsApp</div><div class="grid-cards" id="p1-ume-wp"></div>
-    <div class="sec-label" style="color:#0d7a55;">ODRES — Discador</div><div class="grid-cards" id="p1-odres-disc"></div>
-    <div class="sec-label" style="color:#276749;">ODRES — WhatsApp</div><div class="grid-cards" id="p1-odres-wp"></div>
-    <div class="hslider-row">
-      <label style="font-size:13px;color:#555;">Horas ausente hoje:</label>
-      <input type="range" min="0.5" max="8" step="0.5" value="8" id="hslider" style="width:130px;">
-      <span style="font-size:13px;font-weight:600;color:#1a1a2e;min-width:28px;" id="hval">8h</span>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-inner">
+    <div class="sidebar-top">
+      <div class="logo-wrap">
+        <div class="logo-text">ume<span>.</span></div>
+        <div class="logo-sub">Painel Operacional</div>
+      </div>
+      <button class="sb-toggle" onclick="toggleSidebar()" title="Recolher">&#8592;</button>
     </div>
-    <div class="result-box" id="p1-result"><div class="empty">Selecione um ou mais operadores acima</div></div>
+    <nav class="sb-nav">
+      <button class="sb-btn active" id="sb-painel" onclick="switchApp('painel')" title="Painel">
+        <span class="sb-icon">📊</span>
+        <span class="sb-label">Painel<span class="sb-sub">Faturamento · Equipes</span></span>
+      </button>
+      <button class="sb-btn" id="sb-discador" onclick="switchApp('discador')" title="Discador">
+        <span class="sb-icon">📞</span>
+        <span class="sb-label">Discador<span class="sb-sub">Fev · Mar · Abr</span></span>
+      </button>
+      <button class="sb-btn" id="sb-ura" onclick="switchApp('ura')" title="URAs">
+        <span class="sb-icon">🤖</span>
+        <span class="sb-label">URAs<span class="sb-sub">FPD15 · FPD30 · Loc · Onb</span></span>
+      </button>
+    </nav>
+    <div class="dev-credit">
+      Desenvolvido por<br>
+      <a href="mailto:gustavo.pereira@ume.com.br">Gustavo Pereira</a>
+    </div>
+  </div>
+</aside>
+
+<!-- Overlay (close on click outside) -->
+<div class="sb-overlay" id="sb-overlay" onclick="toggleSidebar()"></div>
+
+<!-- Hamburger (visible when collapsed) -->
+<button class="sb-hamburger" id="sb-hamburger" style="display:none;" onclick="toggleSidebar()" title="Abrir menu">
+  <span></span><span></span><span></span>
+</button>
+
+<div class="main">
+
+  <!-- ══ PAINEL OPERACIONAL ══ -->
+  <div class="app-panel active" id="app-painel" style="padding:28px 24px;font-family:'Inter',sans-serif;">
+    <div class="container">
+      <header>
+        <h1>Painel Operacional</h1>
+        <p>Base: Fevereiro + Março 2026</p>
+      </header>
+      <div class="nav">
+        <button class="nav-btn active" onclick="showPanel('perda',this)">Perda por Ausência</button>
+        <button class="nav-btn" onclick="showPanel('medias',this)">Médias Fev+Mar</button>
+        <button class="nav-btn" onclick="showPanel('semana',this)">Produção por Dia</button>
+        <button class="nav-btn" onclick="showPanel('mes',this)">Mês a Mês</button>
+      </div>
+      <div class="panel active" id="panel-perda">
+        <div style="font-size:12px;color:#888;margin-bottom:10px;">Selecione os operadores ausentes</div>
+        <div class="sec-label" style="color:#60a5fa;">UME — Discador</div><div class="grid-cards" id="p1-ume-disc"></div>
+        <div class="sec-label" style="color:#60a5fa;">UME — Jovem Aprendiz</div><div class="sec-sub">Ter–Sex</div><div class="grid-cards" id="p1-ume-ja"></div>
+        <div class="sec-label" style="color:#a78bfa;">UME — WhatsApp</div><div class="grid-cards" id="p1-ume-wp"></div>
+        <div class="sec-label" style="color:#34d399;">ODRES — Discador</div><div class="grid-cards" id="p1-odres-disc"></div>
+        <div class="sec-label" style="color:#6ee7b7;">ODRES — WhatsApp</div><div class="grid-cards" id="p1-odres-wp"></div>
+        <div class="hslider-row">
+          <label style="font-size:13px;color:#aaa;">Horas ausente hoje:</label>
+          <input type="range" min="0.5" max="8" step="0.5" value="8" id="hslider" style="width:130px;">
+          <span style="font-size:13px;font-weight:600;color:#e2e8f0;min-width:28px;" id="hval">8h</span>
+        </div>
+        <div class="result-box" id="p1-result"><div class="empty">Selecione um ou mais operadores acima</div></div>
+      </div>
+      <div class="panel" id="panel-medias">
+        <div style="font-size:12px;color:#888;margin-bottom:10px;">Médias consolidadas Fevereiro + Março</div>
+        <div class="sec-label" style="color:#60a5fa;">UME — Discador</div><div class="grid-cards" id="p2-ume-disc"></div>
+        <div class="sec-label" style="color:#60a5fa;">UME — Jovem Aprendiz</div><div class="grid-cards" id="p2-ume-ja"></div>
+        <div class="sec-label" style="color:#a78bfa;">UME — WhatsApp</div><div class="grid-cards" id="p2-ume-wp"></div>
+        <div class="sec-label" style="color:#34d399;">ODRES — Discador</div><div class="grid-cards" id="p2-odres-disc"></div>
+        <div class="sec-label" style="color:#6ee7b7;">ODRES — WhatsApp</div><div class="grid-cards" id="p2-odres-wp"></div>
+      </div>
+      <div class="panel" id="panel-semana">
+        <div style="font-size:12px;color:#888;margin-bottom:10px;">Selecione operadores para ver produção por dia da semana</div>
+        <div class="sec-label" style="color:#60a5fa;">UME</div><div class="grid-cards" id="p3-ume"></div>
+        <div class="sec-label" style="color:#34d399;">ODRES</div><div class="grid-cards" id="p3-odres"></div>
+        <div class="result-box" id="p3-result"><div class="empty">Selecione um ou mais operadores acima</div></div>
+      </div>
+      <div class="panel" id="panel-mes">
+        <div style="font-size:12px;color:#888;margin-bottom:14px;">Comparativo de faturamento por operador — Fevereiro vs Março</div>
+        <div id="p4-content"></div>
+      </div>
+    </div>
   </div>
 
-  <!-- P2: MÉDIAS -->
-  <div class="panel" id="panel-medias">
-    <div style="font-size:12px;color:#888;margin-bottom:10px;">Médias consolidadas Fevereiro + Março</div>
-    <div class="sec-label" style="color:#1a56db;">UME — Discador</div><div class="grid-cards" id="p2-ume-disc"></div>
-    <div class="sec-label" style="color:#1a56db;">UME — Jovem Aprendiz</div><div class="grid-cards" id="p2-ume-ja"></div>
-    <div class="sec-label" style="color:#7f56d9;">UME — WhatsApp</div><div class="grid-cards" id="p2-ume-wp"></div>
-    <div class="sec-label" style="color:#0d7a55;">ODRES — Discador</div><div class="grid-cards" id="p2-odres-disc"></div>
-    <div class="sec-label" style="color:#276749;">ODRES — WhatsApp</div><div class="grid-cards" id="p2-odres-wp"></div>
+  <!-- ══ ANÁLISE DISCADOR ══ -->
+  <div class="app-panel" id="app-discador">
+    <!-- NAV DUAL -->
+<nav class="nav-wrap">
+  <div class="nav-row">
+    <span class="nav-label">Período</span>
+    <button class="nbtn active" id="btn-fev-mar" onclick="setPeriod('fev_mar')">
+      <span class="dot"></span> Fev × Mar <span style="font-size:10px;color:var(--text3);margin-left:4px">meses fechados</span>
+    </button>
+    <button class="nbtn" id="btn-fev-mar-abr" onclick="setPeriod('fev_mar_abr')">
+      <span class="dot"></span> Fev × Mar × Abr <span style="font-size:10px;color:var(--text3);margin-left:4px">mesmo DU de Abr (15)</span>
+    </button>
+    <span class="period-note" id="period-note">Fev: 20 DU · Mar: 22 DU — meses fechados completos</span>
   </div>
-
-  <!-- P3: DIA DA SEMANA -->
-  <div class="panel" id="panel-semana">
-    <div style="font-size:12px;color:#888;margin-bottom:10px;">Selecione operadores para ver produção por dia da semana</div>
-    <div class="sec-label" style="color:#1a56db;">UME</div><div class="grid-cards" id="p3-ume"></div>
-    <div class="sec-label" style="color:#0d7a55;">ODRES</div><div class="grid-cards" id="p3-odres"></div>
-    <div class="result-box" id="p3-result"><div class="empty">Selecione um ou mais operadores acima</div></div>
+  <div class="nav-row">
+    <span class="nav-label">Operação</span>
+    <button class="nbtn active" id="btn-ume" onclick="setOp('ume')">
+      <span class="dot"></span> UME
+    </button>
+    <button class="nbtn" id="btn-odres" onclick="setOp('odres')">
+      <span class="dot"></span> Odres
+    </button>
   </div>
+</nav>
 
-  <!-- P4: MÊS A MÊS -->
-  <div class="panel" id="panel-mes">
-    <div style="font-size:12px;color:#888;margin-bottom:14px;">Comparativo de faturamento por operador — Fevereiro vs Março</div>
-    <div id="p4-content"></div>
+<div class="wrap">
+
+<!-- ══════════════════ EXEC SUMMARY ══════════════════ -->
+<div class="exec-box" id="exec-box"></div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════ SEMÁFORO ══════════════════ -->
+<div class="sec">
+  <div class="sec-hd"><h2>🚦 Semáforo de Métricas</h2></div>
+  <div class="sem-grid" id="sem-grid"></div>
+</div>
+
+<!-- ══════════════════ BENCHMARKS ══════════════════ -->
+<div class="sec">
+  <div class="sec-hd"><h2>Benchmarks de Referência</h2></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Métrica</th>
+        <th><span class="badge bg">🟢 Green</span></th>
+        <th><span class="badge bb">🎯 Desired</span></th>
+        <th><span class="badge by">🟡 Yellow</span></th>
+        <th><span class="badge br">🔴 Red</span></th>
+        <th id="bm-col1"></th>
+        <th id="bm-col2"></th>
+        <th id="bm-col3"></th>
+      </tr></thead>
+      <tbody id="bm-body"></tbody>
+    </table>
   </div>
 </div>
 
+<!-- ══════════════════ FUNIL ══════════════════ -->
+<div class="sec">
+  <div class="sec-hd"><h2 id="funil-title">Funil Consolidado</h2></div>
+  <div class="tbl-wrap"><table><thead id="funil-head"></thead><tbody id="funil-body"></tbody></table></div>
+  <div class="fact" id="funil-note"></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════ HEATMAP ══════════════════ -->
+<div class="sec">
+  <div class="sec-hd"><h2>📅 Heatmap de Tempos por Dia Útil</h2></div>
+  <div class="hm-sum" id="hm-sum"></div>
+  <div class="hm-wrap"><table class="hmt"><thead id="hmt-head"></thead><tbody id="hmt-body"></tbody></table></div>
+  <div class="fact-note" id="hm-note"></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════ ALERTAS ══════════════════ -->
+<div class="sec">
+  <div class="sec-hd"><h2 id="alert-title">Alertas</h2></div>
+  <div id="alerts-wrap"></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════ PERFORMANCE OPERADORES ══════════════════ -->
+<div class="sec">
+  <div class="sec-hd"><h2>Performance por Operador — Fev+Mar</h2></div>
+  <div class="tbl-wrap"><table><thead id="perf-head"></thead><tbody id="perf-body"></tbody></table></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════ INSIGHTS ══════════════════ -->
+<div class="sec">
+  <div class="sec-hd"><h2>💡 Insights Adicionais</h2></div>
+  <div class="ins-grid" id="insights-wrap"></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════ PROJEÇÃO ══════════════════ -->
+<div class="sec">
+  <div class="sec-hd"><h2>📈 Projeção de Impacto</h2></div>
+  <div class="fact" style="margin-bottom:14px">
+    <strong>Base do cálculo:</strong> Projeção baseada nos impactos financeiros individuais dos desligamentos de Abril (Vitória, Pamela, Simone) e afastamento da Raquel. Substituição leva em média 30 dias + 30 dias para produtividade plena → recuperação parcial apenas em Junho.
+  </div>
+  <div class="proj">
+    <div class="proj-i"><div class="proj-l">Risco UME (Abr)</div><div class="proj-v" style="color:var(--red)">R$ 55k</div><div class="proj-s">Vitória + Pamela + Raquel</div></div>
+    <div class="proj-i"><div class="proj-l">Risco Odres (Abr)</div><div class="proj-v" style="color:var(--red)">R$ 53k</div><div class="proj-s">Simone Gama</div></div>
+    <div class="proj-i"><div class="proj-l">Risco Total (Abr)</div><div class="proj-v" style="color:var(--red)">R$ 108k</div><div class="proj-s">Sem banco de reserva ativo</div></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════ PLANO DE CONTRAMEDIDAS ══════════════════ -->
+<div class="sec" id="sec-checklist">
+  <div class="sec-hd"><h2>🟢 Plano de Contramedidas — Responsáveis e Prazos</h2></div>
+  <div id="checklist-wrap"></div>
+</div>
+
+</div><!-- /wrap -->
+  </div>
+
+
+<!-- ══ URA PANEL ══ -->
+<div class="app-panel" id="app-ura">
+  <div class="ura-shell">
+    <!-- URA Sub-nav -->
+    <div class="ura-subnav">
+      <button class="ura-tab active" id="utab-fpd15"    onclick="switchUra('fpd15')">📞 URA FPD15<span>0–15 dias</span></button>
+      <button class="ura-tab"        id="utab-loc"      onclick="switchUra('loc')">📍 Localizador<span>Odres</span></button>
+      <button class="ura-tab"        id="utab-onb"      onclick="switchUra('onb')">🆕 Onboarding<span>Odres</span></button>
+      <button class="ura-tab"        id="utab-fpd30"    onclick="switchUra('fpd30')">📞 URA FPD30<span>30+ dias</span></button>
+    </div>
+    <!-- URA Content -->
+    <div class="ura-body" id="ura-body"></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ══════════ APP SWITCHER ══════════ -->
 <script>
-const ops = [
-  { name:'Andressa Bruna',   initials:'AB', color:'#dbeafe', tc:'#1e40af', fev:{total:15291,dias:20},  mar:{total:15174.46,dias:21}, equipe:'UME',   sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-ume-disc',   p2:'p2-ume-disc',   p3:'p3-ume'   },
-  { name:'Raquel Moreira',   initials:'RM', color:'#dbeafe', tc:'#1e40af', fev:{total:8108,dias:20},   mar:{total:3882.26,dias:21},  equipe:'UME',   sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-ume-disc',   p2:'p2-ume-disc',   p3:'p3-ume'   },
-  { name:'Rayara Danielle',  initials:'RD', color:'#dbeafe', tc:'#1e40af', fev:{total:5567,dias:20},   mar:{total:2670.92,dias:21},  equipe:'UME',   sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-ume-disc',   p2:'p2-ume-disc',   p3:'p3-ume'   },
-  { name:'Vitória Ketelin',  initials:'VK', color:'#fee2e2', tc:'#991b1b', fev:{total:40069,dias:15},  mar:{total:4702.85,dias:5},   equipe:'UME',   sub:'Discador',       tag:'Desl.',  ativo:false, p1:'p1-ume-disc',   p2:'p2-ume-disc',   p3:'p3-ume'   },
-  { name:'Pamela Moreira',   initials:'PM', color:'#fee2e2', tc:'#991b1b', fev:{total:8482,dias:15},   mar:{total:7336.73,dias:10},  equipe:'UME',   sub:'Discador',       tag:'Desl.',  ativo:false, p1:'p1-ume-disc',   p2:'p2-ume-disc',   p3:'p3-ume'   },
-  { name:'Kayke Araújo',     initials:'KA', color:'#bfdbfe', tc:'#1e3a8a', fev:{total:18786,dias:16},  mar:{total:9241.93,dias:17},  equipe:'UME',   sub:'Jovem Aprendiz', tag:'J.A.',   ativo:true,  p1:'p1-ume-ja',     p2:'p2-ume-ja',     p3:'p3-ume'   },
-  { name:'Pamela Isabelle',  initials:'PI', color:'#bfdbfe', tc:'#1e3a8a', fev:{total:29052,dias:16},  mar:{total:14813.61,dias:17}, equipe:'UME',   sub:'Jovem Aprendiz', tag:'J.A.',   ativo:true,  p1:'p1-ume-ja',     p2:'p2-ume-ja',     p3:'p3-ume'   },
-  { name:'Lauane Stephanie', initials:'LS', color:'#ede9fe', tc:'#5b21b6', fev:{total:0,dias:0},       mar:{total:1125.50,dias:10},  equipe:'UME',   sub:'WhatsApp',       tag:'WP',     ativo:true,  p1:'p1-ume-wp',     p2:'p2-ume-wp',     p3:'p3-ume'   },
-  { name:'Adriano Correia',  initials:'AC', color:'#d1fae5', tc:'#065f46', fev:{total:15910,dias:20},  mar:{total:5780.32,dias:21},  equipe:'ODRES', sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-odres-disc', p2:'p2-odres-disc', p3:'p3-odres' },
-  { name:'Beatriz Santos',   initials:'BS', color:'#d1fae5', tc:'#065f46', fev:{total:13736,dias:20},  mar:{total:7349.76,dias:21},  equipe:'ODRES', sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-odres-disc', p2:'p2-odres-disc', p3:'p3-odres' },
-  { name:'Larissa Rosário',  initials:'LR', color:'#d1fae5', tc:'#065f46', fev:{total:7792,dias:20},   mar:{total:7300.32,dias:21},  equipe:'ODRES', sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-odres-disc', p2:'p2-odres-disc', p3:'p3-odres' },
-  { name:'Simone Gama',      initials:'SG', color:'#fee2e2', tc:'#991b1b', fev:{total:36851,dias:15},  mar:{total:29875.64,dias:10}, equipe:'ODRES', sub:'Discador',       tag:'Desl.',  ativo:false, p1:'p1-odres-disc', p2:'p2-odres-disc', p3:'p3-odres' },
-  { name:'Talita Souza',     initials:'TS', color:'#d1fae5', tc:'#14532d', fev:{total:2124,dias:20},   mar:{total:0,dias:0},         equipe:'ODRES', sub:'WhatsApp',       tag:'WP',     ativo:true,  p1:'p1-odres-wp',   p2:'p2-odres-wp',   p3:'p3-odres' },
-];
-
-const rawMar = {
-  'Andressa Bruna':  [2418.6,0,410.5,0,1014.4,1546.5,0,264.24,1210.74,69.64,3217.78,1406.28,0,266.53,0,928.39,565.91,200.09,385.73,100,398,516.13],
-  'Raquel Moreira':  [0,0,0,1734.75,326.62,141,0,0,518.35,0,0,0,0,506.78,0,654.76,0,0,0,0,0,0],
-  'Rayara Danielle': [0,0,0,0,0,0,0,0,0,0,0,395.69,0,0,1016.66,0,482.91,383.66,0,0,198,194],
-  'Vitória Ketelin': [0,0,0,0,2812.68,0,0,1604.41,0,0,285.76,0,0,0,0,0,0,0,0,0,0,0],
-  'Pamela Moreira':  [707.6,230.23,304,630.92,771.49,0,0,0,0,0,1297.02,148,0,1188.19,0,0,0,0,0,0,0,0],
-  'Kayke Araújo':    [0,912.88,1788.66,1695.16,1284.87,0,0,280.46,228.74,428.36,0,0,0,922.96,0,0,0,0,395.86,0,0,1303.98],
-  'Pamela Isabelle': [0,6648.44,282.61,1759.38,663.06,0,0,0,1310.49,428.42,0,0,0,583.9,0,0,0,0,2215.75,0,0,921.56],
-  'Lauane Stephanie':[0,0,0,0,0,0,0,0,0,0,0,418,707.5,0,0,0,0,0,0,0,0,0],
-  'Adriano Correia': [362,1469.97,485.55,0,927.37,226.4,0,130.05,184.44,0,0,241.78,0,450.5,0,0,526.8,371.13,404.33,0,0,0],
-  'Beatriz Santos':  [2130.91,985.77,0,408.24,948.24,1127.91,0,0,0,0,462.21,82.21,301.68,304.45,0,277.67,0,0,0,220.47,0,100],
-  'Larissa Rosário': [993.94,458.53,472.15,237.93,0,912.08,0,0,266.36,0,708.68,621.71,0,171.15,238,253.84,301.88,251.41,0,0,0,323.09],
-  'Simone Gama':     [6321.53,3516.43,3345.01,932.54,1747.32,4858.88,191,0,890.3,0,1960.28,1092.72,908.38,801.46,0,791.46,893.91,1028.21,0,0,0,0],
-  'Talita Souza':    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-};
-
-const calendario = [[0],[1],[2],[3],[4],[0],[1],[2],[3],[4],[0],[2],[3],[4],[0],[1],[2],[3],[4],[0],[1]];
-const diasNome = ['Segunda','Terça','Quarta','Quinta','Sexta'];
-const diasCor  = ['#eff6ff','#f0fdf4','#f5f3ff','#fffbeb','#fff7ed'];
-const diasTxt  = ['#1e40af','#065f46','#5b21b6','#92400e','#9a3412'];
-const diasBar  = ['#3b82f6','#22c55e','#8b5cf6','#f59e0b','#f97316'];
-
-function calcMediaDia(nome){
-  const vals=rawMar[nome]||[];
-  const soma=[0,0,0,0,0],cont=[0,0,0,0,0];
-  calendario.forEach(([ds],i)=>{const v=vals[i]||0;if(v>0){soma[ds]+=v;cont[ds]++;}});
-  return soma.map((s,i)=>cont[i]>0?s/cont[i]:0);
+function switchApp(name) {
+  document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('app-' + name).classList.add('active');
+  document.getElementById('sb-' + name).classList.add('active');
 }
-
-ops.forEach(op=>{
-  op.mediaDia=calcMediaDia(op.name);
-  const td=op.fev.dias+op.mar.dias;
-  op.mediaDiaCons=td>0?(op.fev.total+op.mar.total)/td:0;
-  op.mediaHora=op.mediaDiaCons/8;
-  op.mensalEst=op.mediaDiaCons*(op.sub==='Jovem Aprendiz'?17:20);
-});
-
-const totalMensal=ops.reduce((s,o)=>s+o.mensalEst,0);
-const totalDia=ops.reduce((s,o)=>s+o.mediaDiaCons,0);
-const fmt  = v=>v>0?'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
-const fmt0 = v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
-const fmtV = v=>v===0?'—':'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-const pct  = v=>(v*100).toFixed(1)+'%';
-
-const selP1=new Set(),selP3=new Set();
-let horas=8;
-
-function showPanel(id,btn){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  btn.classList.add('active');
-  if(id==='mes')renderP4();
+function toggleSidebar() {
+  const sb       = document.getElementById('sidebar');
+  const overlay  = document.getElementById('sb-overlay');
+  const hamburger= document.getElementById('sb-hamburger');
+  const main     = document.querySelector('.main');
+  const collapsed = sb.classList.toggle('collapsed');
+  overlay.classList.toggle('visible', !collapsed);
+  hamburger.style.display = collapsed ? 'flex' : 'none';
+  main.style.marginLeft   = collapsed ? '0' : '220px';
 }
+</script>
 
-function buildCard(op,i,container,selSet,renderFn,mode){
-  const cont=document.getElementById(container);
-  if(!cont)return;
-  const div=document.createElement('div');
-  div.className='card';
-  let valsHtml='';
-  if(mode==='medias'){
-    valsHtml=`<div class="cvals">
-      <span>Fev: <b style="color:#1a1a2e">${op.fev.total>0?fmt(op.fev.total):'—'}</b></span>
-      <span>Mar: <b style="color:#1a1a2e">${op.mar.total>0?fmt(op.mar.total):'—'}</b></span>
-      <span>Média/dia: <b style="color:#1a1a2e">${op.mediaDiaCons>0?fmt(op.mediaDiaCons):'—'}</b></span>
-      <span>Média/hora: <b style="color:#1a1a2e">${op.mediaHora>0?fmt(op.mediaHora):'—'}</b></span>
+<!-- ══════════ PAINEL OPERACIONAL JS ══════════ -->
+<script>
+(function() {
+  // All painel vars scoped in IIFE to avoid global conflicts
+  const ops = [
+    { name:'Andressa Bruna',   initials:'AB', color:'#1e3a5f', tc:'#93c5fd', fev:{total:15291,dias:20},  mar:{total:15174.46,dias:21}, equipe:'UME',   sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-ume-disc',   p2:'p2-ume-disc',   p3:'p3-ume'   },
+    { name:'Raquel Moreira',   initials:'RM', color:'#1e3a5f', tc:'#93c5fd', fev:{total:8108,dias:20},   mar:{total:3882.26,dias:21},  equipe:'UME',   sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-ume-disc',   p2:'p2-ume-disc',   p3:'p3-ume'   },
+    { name:'Rayara Danielle',  initials:'RD', color:'#1e3a5f', tc:'#93c5fd', fev:{total:5567,dias:20},   mar:{total:2670.92,dias:21},  equipe:'UME',   sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-ume-disc',   p2:'p2-ume-disc',   p3:'p3-ume'   },
+    { name:'Vitória Ketelin',  initials:'VK', color:'#3b0a0a', tc:'#fca5a5', fev:{total:40069,dias:15},  mar:{total:4702.85,dias:5},   equipe:'UME',   sub:'Discador',       tag:'Desl.',  ativo:false, p1:'p1-ume-disc',   p2:'p2-ume-disc',   p3:'p3-ume'   },
+    { name:'Pamela Moreira',   initials:'PM', color:'#3b0a0a', tc:'#fca5a5', fev:{total:8482,dias:15},   mar:{total:7336.73,dias:10},  equipe:'UME',   sub:'Discador',       tag:'Desl.',  ativo:false, p1:'p1-ume-disc',   p2:'p2-ume-disc',   p3:'p3-ume'   },
+    { name:'Kayke Araújo',     initials:'KA', color:'#1e3a5f', tc:'#bfdbfe', fev:{total:18786,dias:16},  mar:{total:9241.93,dias:17},  equipe:'UME',   sub:'Jovem Aprendiz', tag:'J.A.',   ativo:true,  p1:'p1-ume-ja',     p2:'p2-ume-ja',     p3:'p3-ume'   },
+    { name:'Pamela Isabelle',  initials:'PI', color:'#1e3a5f', tc:'#bfdbfe', fev:{total:29052,dias:16},  mar:{total:14813.61,dias:17}, equipe:'UME',   sub:'Jovem Aprendiz', tag:'J.A.',   ativo:true,  p1:'p1-ume-ja',     p2:'p2-ume-ja',     p3:'p3-ume'   },
+    { name:'Lauane Stephanie', initials:'LS', color:'#2d1b69', tc:'#c4b5fd', fev:{total:0,dias:0},       mar:{total:1125.50,dias:10},  equipe:'UME',   sub:'WhatsApp',       tag:'WP',     ativo:true,  p1:'p1-ume-wp',     p2:'p2-ume-wp',     p3:'p3-ume'   },
+    { name:'Adriano Correia',  initials:'AC', color:'#052e16', tc:'#6ee7b7', fev:{total:15910,dias:20},  mar:{total:5780.32,dias:21},  equipe:'ODRES', sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-odres-disc', p2:'p2-odres-disc', p3:'p3-odres' },
+    { name:'Beatriz Santos',   initials:'BS', color:'#052e16', tc:'#6ee7b7', fev:{total:13736,dias:20},  mar:{total:7349.76,dias:21},  equipe:'ODRES', sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-odres-disc', p2:'p2-odres-disc', p3:'p3-odres' },
+    { name:'Larissa Rosário',  initials:'LR', color:'#052e16', tc:'#6ee7b7', fev:{total:7792,dias:20},   mar:{total:7300.32,dias:21},  equipe:'ODRES', sub:'Discador',       tag:'Disc.',  ativo:true,  p1:'p1-odres-disc', p2:'p2-odres-disc', p3:'p3-odres' },
+    { name:'Simone Gama',      initials:'SG', color:'#3b0a0a', tc:'#fca5a5', fev:{total:36851,dias:15},  mar:{total:29875.64,dias:10}, equipe:'ODRES', sub:'Discador',       tag:'Desl.',  ativo:false, p1:'p1-odres-disc', p2:'p2-odres-disc', p3:'p3-odres' },
+    { name:'Talita Souza',     initials:'TS', color:'#052e16', tc:'#a7f3d0', fev:{total:2124,dias:20},   mar:{total:0,dias:0},         equipe:'ODRES', sub:'WhatsApp',       tag:'WP',     ativo:true,  p1:'p1-odres-wp',   p2:'p2-odres-wp',   p3:'p3-odres' },
+  ];
+  const rawMar = {
+    'Andressa Bruna':  [2418.6,0,410.5,0,1014.4,1546.5,0,264.24,1210.74,69.64,3217.78,1406.28,0,266.53,0,928.39,565.91,200.09,385.73,100,398,516.13],
+    'Raquel Moreira':  [0,0,0,1734.75,326.62,141,0,0,518.35,0,0,0,0,506.78,0,654.76,0,0,0,0,0,0],
+    'Rayara Danielle': [0,0,0,0,0,0,0,0,0,0,0,395.69,0,0,1016.66,0,482.91,383.66,0,0,198,194],
+    'Vitória Ketelin': [0,0,0,0,2812.68,0,0,1604.41,0,0,285.76,0,0,0,0,0,0,0,0,0,0,0],
+    'Pamela Moreira':  [707.6,230.23,304,630.92,771.49,0,0,0,0,0,1297.02,148,0,1188.19,0,0,0,0,0,0,0,0],
+    'Kayke Araújo':    [0,912.88,1788.66,1695.16,1284.87,0,0,280.46,228.74,428.36,0,0,0,922.96,0,0,0,0,395.86,0,0,1303.98],
+    'Pamela Isabelle': [0,6648.44,282.61,1759.38,663.06,0,0,0,1310.49,428.42,0,0,0,583.9,0,0,0,0,2215.75,0,0,921.56],
+    'Lauane Stephanie':[0,0,0,0,0,0,0,0,0,0,0,418,707.5,0,0,0,0,0,0,0,0,0],
+    'Adriano Correia': [362,1469.97,485.55,0,927.37,226.4,0,130.05,184.44,0,0,241.78,0,450.5,0,0,526.8,371.13,404.33,0,0,0],
+    'Beatriz Santos':  [2130.91,985.77,0,408.24,948.24,1127.91,0,0,0,0,462.21,82.21,301.68,304.45,0,277.67,0,0,0,220.47,0,100],
+    'Larissa Rosário': [993.94,458.53,472.15,237.93,0,912.08,0,0,266.36,0,708.68,621.71,0,171.15,238,253.84,301.88,251.41,0,0,0,323.09],
+    'Simone Gama':     [6321.53,3516.43,3345.01,932.54,1747.32,4858.88,191,0,890.3,0,1960.28,1092.72,908.38,801.46,0,791.46,893.91,1028.21,0,0,0,0],
+    'Talita Souza':    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  };
+  const calendario=[[0],[1],[2],[3],[4],[0],[1],[2],[3],[4],[0],[2],[3],[4],[0],[1],[2],[3],[4],[0],[1]];
+  const diasNome=['Segunda','Terça','Quarta','Quinta','Sexta'];
+  const diasCor=['#eff6ff','#f0fdf4','#f5f3ff','#fffbeb','#fff7ed'];
+  const diasTxt=['#93c5fd','#6ee7b7','#c4b5fd','#92400e','#9a3412'];
+  const diasBar=['#3b82f6','#22c55e','#8b5cf6','#f59e0b','#f97316'];
+  function calcMediaDia(nome){
+    const vals=rawMar[nome]||[];
+    const soma=[0,0,0,0,0],cont=[0,0,0,0,0];
+    calendario.forEach(([ds],i)=>{const v=vals[i]||0;if(v>0){soma[ds]+=v;cont[ds]++;}});
+    return soma.map((s,i)=>cont[i]>0?s/cont[i]:0);
+  }
+  ops.forEach(op=>{
+    op.mediaDia=calcMediaDia(op.name);
+    const td=op.fev.dias+op.mar.dias;
+    op.mediaDiaCons=td>0?(op.fev.total+op.mar.total)/td:0;
+    op.mediaHora=op.mediaDiaCons/8;
+    op.mensalEst=op.mediaDiaCons*(op.sub==='Jovem Aprendiz'?17:20);
+  });
+  const totalMensal=ops.reduce((s,o)=>s+o.mensalEst,0);
+  const totalDia=ops.reduce((s,o)=>s+o.mediaDiaCons,0);
+  const P_fmt  = v=>v>0?'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+  const P_fmt0 = v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+  const P_fmtV = v=>v===0?'—':'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const P_pct  = v=>(v*100).toFixed(1)+'%';
+  const selP1=new Set(), selP3=new Set();
+  let horas=8;
+
+  window.showPanel = function(id,btn){
+    document.querySelectorAll('#app-painel .panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('#app-painel .nav-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('panel-'+id).classList.add('active');
+    btn.classList.add('active');
+    if(id==='mes') renderP4();
+  };
+
+  function buildCard(op,i,container,selSet,renderFn,mode){
+    const cont=document.getElementById(container);
+    if(!cont) return;
+    const div=document.createElement('div');
+    div.className='card';
+    let valsHtml='';
+    if(mode==='medias'){
+      valsHtml=`<div class="cvals">
+        <span>Fev: <b>${op.fev.total>0?P_fmt(op.fev.total):'—'}</b></span>
+        <span>Mar: <b>${op.mar.total>0?P_fmt(op.mar.total):'—'}</b></span>
+        <span>Média/dia: <b>${op.mediaDiaCons>0?P_fmt(op.mediaDiaCons):'—'}</b></span>
+        <span>Média/hora: <b>${op.mediaHora>0?P_fmt(op.mediaHora):'—'}</b></span>
+      </div>`;
+    }
+    div.innerHTML=`
+      <div class="initials" style="background:${op.color};color:${op.tc}">${op.initials}</div>
+      <div class="cname">${op.name}</div>
+      ${valsHtml}
+      <span class="ctag" style="background:${op.color};color:${op.tc}">${op.equipe} · ${op.tag}</span>`;
+    if(selSet){
+      div.addEventListener('click',()=>{
+        if(selSet.has(i)) selSet.delete(i); else selSet.add(i);
+        div.classList.toggle('selected',selSet.has(i));
+        renderFn();
+      });
+    }
+    cont.appendChild(div);
+  }
+
+  ops.forEach((op,i)=>{
+    buildCard(op,i,op.p1,selP1,renderP1,'');
+    buildCard(op,i,op.p2,null,null,'medias');
+    buildCard(op,i,op.p3,selP3,renderP3,'');
+  });
+
+  document.getElementById('hslider').addEventListener('input',e=>{
+    horas=parseFloat(e.target.value);
+    document.getElementById('hval').textContent=horas+'h';
+    renderP1();
+  });
+
+  function teamBlockP1(label,barColor,sel){
+    if(!sel.length) return '';
+    const pDia=sel.reduce((s,o)=>s+o.mediaDiaCons,0);
+    const pHoje=sel.reduce((s,o)=>s+o.mediaHora*horas,0);
+    const pMes=sel.reduce((s,o)=>s+o.mensalEst,0);
+    const pctD=totalDia>0?pDia/totalDia:0;
+    const pctM=totalMensal>0?pMes/totalMensal:0;
+    return`<div class="team-block">
+      <div class="team-title" style="color:${barColor}">${label} — ${sel.length} ausente${sel.length>1?'s':''}</div>
+      <div class="g3">
+        <div class="m mr"><div class="ml">Hoje (${horas}h)</div><div class="mv">${P_fmt(pHoje)}</div></div>
+        <div class="m mr"><div class="ml">Dia completo</div><div class="mv">${P_fmt(pDia)}</div></div>
+        <div class="m mr"><div class="ml">Mensal est.</div><div class="mv">${P_fmt(pMes)}</div></div>
+      </div>
+      <div class="g2">
+        <div class="m mr"><div class="ml">% fat. dia</div><div class="mv">${P_pct(pctD)}</div></div>
+        <div class="m mr"><div class="ml">% fat. mês</div><div class="mv">${P_pct(pctM)}</div></div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:3px;"><span>Impacto no dia</span><span style="color:#f87171;font-weight:600">${P_pct(pctD)}</span></div>
+        <div class="pct-bar-bg"><div class="pct-bar" style="width:${Math.min(pctD*100,100).toFixed(0)}%;background:${barColor};"></div></div>
+      </div>
+      ${sel.map(o=>`<div class="row-item">
+        <span class="row-name">${o.name}</span>
+        <div class="row-vals">
+          <span>hoje: <b>${P_fmt(o.mediaHora*horas)}</b></span>
+          <span>dia: <b>${P_fmt(o.mediaDiaCons)}</b></span>
+          <span>mês: <b>${P_fmt(o.mensalEst)}</b></span>
+          <span>dia: <b style="color:#f87171">${P_pct(totalDia>0?o.mediaDiaCons/totalDia:0)}</b></span>
+        </div>
+      </div>`).join('')}
     </div>`;
   }
-  div.innerHTML=`
-    <div class="initials" style="background:${op.color};color:${op.tc}">${op.initials}</div>
-    <div class="cname">${op.name}</div>
-    ${valsHtml}
-    <span class="ctag" style="background:${op.color};color:${op.tc}">${op.equipe} · ${op.tag}</span>
-  `;
-  if(selSet){
-    div.addEventListener('click',()=>{
-      if(selSet.has(i))selSet.delete(i);else selSet.add(i);
-      div.classList.toggle('selected',selSet.has(i));
-      renderFn();
-    });
-  }
-  cont.appendChild(div);
-}
 
-ops.forEach((op,i)=>{
-  buildCard(op,i,op.p1,selP1,renderP1,'');
-  buildCard(op,i,op.p2,null,null,'medias');
-  buildCard(op,i,op.p3,selP3,renderP3,'');
-});
-
-document.getElementById('hslider').addEventListener('input',e=>{
-  horas=parseFloat(e.target.value);
-  document.getElementById('hval').textContent=horas+'h';
-  renderP1();
-});
-
-function teamBlockP1(label,barColor,sel){
-  if(!sel.length)return'';
-  const pDia=sel.reduce((s,o)=>s+o.mediaDiaCons,0);
-  const pHoje=sel.reduce((s,o)=>s+o.mediaHora*horas,0);
-  const pMes=sel.reduce((s,o)=>s+o.mensalEst,0);
-  const pctD=totalDia>0?pDia/totalDia:0;
-  const pctM=totalMensal>0?pMes/totalMensal:0;
-  return`<div class="team-block">
-    <div class="team-title" style="color:${barColor}">${label} — ${sel.length} ausente${sel.length>1?'s':''}</div>
-    <div class="g3">
-      <div class="m mr"><div class="ml">Hoje (${horas}h)</div><div class="mv">${fmt(pHoje)}</div></div>
-      <div class="m mr"><div class="ml">Dia completo</div><div class="mv">${fmt(pDia)}</div></div>
-      <div class="m mr"><div class="ml">Mensal est.</div><div class="mv">${fmt(pMes)}</div></div>
-    </div>
-    <div class="g2">
-      <div class="m mr"><div class="ml">% faturamento dia</div><div class="mv">${pct(pctD)}</div></div>
-      <div class="m mr"><div class="ml">% faturamento mês</div><div class="mv">${pct(pctM)}</div></div>
-    </div>
-    <div style="margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:3px;"><span>Impacto no dia</span><span style="color:#922b21;font-weight:600">${pct(pctD)}</span></div>
-      <div class="pct-bar-bg"><div class="pct-bar" style="width:${Math.min(pctD*100,100).toFixed(0)}%;background:${barColor};"></div></div>
-    </div>
-    ${sel.map(o=>`<div class="row-item">
-      <span class="row-name">${o.name}</span>
-      <div class="row-vals">
-        <span>hoje: <b>${fmt(o.mediaHora*horas)}</b></span>
-        <span>dia: <b>${fmt(o.mediaDiaCons)}</b></span>
-        <span>mês: <b>${fmt(o.mensalEst)}</b></span>
-        <span style="color:#c0392b">dia: <b style="color:#922b21">${pct(totalDia>0?o.mediaDiaCons/totalDia:0)}</b></span>
+  function renderP1(){
+    const box=document.getElementById('p1-result');
+    if(selP1.size===0){box.innerHTML='<div class="empty">Selecione um ou mais operadores acima</div>';return;}
+    const sel=[...selP1].map(i=>ops[i]);
+    const uD=sel.filter(o=>o.equipe==='UME'&&o.sub==='Discador');
+    const uJ=sel.filter(o=>o.equipe==='UME'&&o.sub==='Jovem Aprendiz');
+    const uW=sel.filter(o=>o.equipe==='UME'&&o.sub==='WhatsApp');
+    const oD=sel.filter(o=>o.equipe==='ODRES'&&o.sub==='Discador');
+    const oW=sel.filter(o=>o.equipe==='ODRES'&&o.sub==='WhatsApp');
+    const pDia=sel.reduce((s,o)=>s+o.mediaDiaCons,0);
+    const pHoje=sel.reduce((s,o)=>s+o.mediaHora*horas,0);
+    const pMes=sel.reduce((s,o)=>s+o.mensalEst,0);
+    box.innerHTML=`
+      <div class="sec-label" style="margin-bottom:10px;">Total — ${sel.length} operador${sel.length>1?'es':''} ausente${sel.length>1?'s':''}</div>
+      <div class="g3">
+        <div class="m mr"><div class="ml">Hoje (${horas}h)</div><div class="mv">${P_fmt(pHoje)}</div></div>
+        <div class="m mr"><div class="ml">Dia completo</div><div class="mv">${P_fmt(pDia)}</div></div>
+        <div class="m mr"><div class="ml">Mensal est.</div><div class="mv">${P_fmt(pMes)}</div></div>
       </div>
-    </div>`).join('')}
-  </div>`;
-}
-
-function renderP1(){
-  const box=document.getElementById('p1-result');
-  if(selP1.size===0){box.innerHTML='<div class="empty">Selecione um ou mais operadores acima</div>';return;}
-  const sel=[...selP1].map(i=>ops[i]);
-  const uD=sel.filter(o=>o.equipe==='UME'&&o.sub==='Discador');
-  const uJ=sel.filter(o=>o.equipe==='UME'&&o.sub==='Jovem Aprendiz');
-  const uW=sel.filter(o=>o.equipe==='UME'&&o.sub==='WhatsApp');
-  const oD=sel.filter(o=>o.equipe==='ODRES'&&o.sub==='Discador');
-  const oW=sel.filter(o=>o.equipe==='ODRES'&&o.sub==='WhatsApp');
-  const pDia=sel.reduce((s,o)=>s+o.mediaDiaCons,0);
-  const pHoje=sel.reduce((s,o)=>s+o.mediaHora*horas,0);
-  const pMes=sel.reduce((s,o)=>s+o.mensalEst,0);
-  box.innerHTML=`
-    <div class="sec-label" style="margin-bottom:10px;">Total — ${sel.length} operador${sel.length>1?'es':''} ausente${sel.length>1?'s':''}</div>
-    <div class="g3">
-      <div class="m mr"><div class="ml">Hoje (${horas}h)</div><div class="mv">${fmt(pHoje)}</div></div>
-      <div class="m mr"><div class="ml">Dia completo</div><div class="mv">${fmt(pDia)}</div></div>
-      <div class="m mr"><div class="ml">Mensal est.</div><div class="mv">${fmt(pMes)}</div></div>
-    </div>
-    <div class="g2">
-      <div class="m mr"><div class="ml">% faturamento dia</div><div class="mv">${pct(pDia/totalDia)}</div></div>
-      <div class="m mr"><div class="ml">% faturamento mês</div><div class="mv">${pct(pMes/totalMensal)}</div></div>
-    </div>
-    <hr class="divider">
-    ${teamBlockP1('UME — Discador','#1a56db',uD)}
-    ${teamBlockP1('UME — Jovem Aprendiz','#1e40af',uJ)}
-    ${teamBlockP1('UME — WhatsApp','#7f56d9',uW)}
-    ${teamBlockP1('ODRES — Discador','#0d7a55',oD)}
-    ${teamBlockP1('ODRES — WhatsApp','#276749',oW)}
-  `;
-}
-
-function renderP3(){
-  const box=document.getElementById('p3-result');
-  if(selP3.size===0){box.innerHTML='<div class="empty">Selecione um ou mais operadores acima</div>';return;}
-  const sel=[...selP3].map(i=>ops[i]);
-  const totalPorDia=diasNome.map((_,d)=>sel.reduce((s,o)=>s+o.mediaDia[d],0));
-  const maxDia=Math.max(...totalPorDia,1);
-  const dayCards=diasNome.map((nome,d)=>`
-    <div class="day-card" style="background:${diasCor[d]};">
-      <div class="dl" style="color:${diasTxt[d]}">${nome}</div>
-      <div class="dv" style="color:${diasTxt[d]}">${fmt0(totalPorDia[d])}</div>
-      <div class="mini-bar" style="background:${diasBar[d]};width:${(totalPorDia[d]/maxDia*100).toFixed(0)}%;margin:4px auto 0;"></div>
-    </div>`).join('');
-  const rows=sel.map(o=>{
-    const cells=o.mediaDia.map((v,d)=>`<td>${v>0?fmt0(v):'—'}${v>0?`<div class="mini-bar" style="background:${diasBar[d]};width:${(v/maxDia*100).toFixed(0)}%;margin:2px auto 0;"></div>`:''}</td>`).join('');
-    return`<tr><td class="left">${o.name}<br><span style="font-size:10px;color:#aaa;">${o.equipe} · ${o.tag}</span></td>${cells}</tr>`;
-  }).join('');
-  box.innerHTML=`
-    <div class="sec-label" style="margin-bottom:10px;">Produção média por dia — ${sel.length} operador${sel.length>1?'es':''}</div>
-    <div class="g5">${dayCards}</div>
-    <hr class="divider">
-    <div style="overflow-x:auto;">
-      <table class="op-table">
-        <thead><tr><th class="left">Operador</th>${diasNome.map(n=>`<th>${n}</th>`).join('')}</tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-    <div style="font-size:11px;color:#bbb;margin-top:8px;">Média dos dias com produção em março.</div>
-  `;
-}
-
-function renderP4(){
-  const cont=document.getElementById('p4-content');
-  const totalFev=ops.reduce((s,o)=>s+o.fev.total,0);
-  const totalMar=ops.reduce((s,o)=>s+o.mar.total,0);
-  const varTotal=totalFev>0?((totalMar-totalFev)/totalFev*100):0;
-  const umeOps=ops.filter(o=>o.equipe==='UME');
-  const odresOps=ops.filter(o=>o.equipe==='ODRES');
-  const umeFev=umeOps.reduce((s,o)=>s+o.fev.total,0);
-  const umeMar=umeOps.reduce((s,o)=>s+o.mar.total,0);
-  const odresFev=odresOps.reduce((s,o)=>s+o.fev.total,0);
-  const odresMar=odresOps.reduce((s,o)=>s+o.mar.total,0);
-  const varUme=umeFev>0?((umeMar-umeFev)/umeFev*100):0;
-  const varOdres=odresFev>0?((odresMar-odresFev)/odresFev*100):0;
-
-  function vBadge(fev,mar){
-    if(fev===0&&mar===0)return'<span class="badge-eq">—</span>';
-    if(fev===0)return'<span class="badge-new">novo</span>';
-    if(mar===0)return'<span class="badge-desl">inativo</span>';
-    const v=(mar-fev)/fev*100;
-    return v>=0?`<span class="badge-up">+${v.toFixed(1)}%</span>`:`<span class="badge-dn">${v.toFixed(1)}%</span>`;
+      <div class="g2">
+        <div class="m mr"><div class="ml">% fat. dia</div><div class="mv">${P_pct(pDia/totalDia)}</div></div>
+        <div class="m mr"><div class="ml">% fat. mês</div><div class="mv">${P_pct(pMes/totalMensal)}</div></div>
+      </div>
+      <hr class="divider">
+      ${teamBlockP1('UME — Discador','#14cb53',uD)}
+      ${teamBlockP1('UME — Jovem Aprendiz','#14cb53',uJ)}
+      ${teamBlockP1('UME — WhatsApp','#7f56d9',uW)}
+      ${teamBlockP1('ODRES — Discador','#0d7a55',oD)}
+      ${teamBlockP1('ODRES — WhatsApp','#276749',oW)}`;
   }
 
-  function teamTable(label,color,teamOps){
-    const tFev=teamOps.reduce((s,o)=>s+o.fev.total,0);
-    const tMar=teamOps.reduce((s,o)=>s+o.mar.total,0);
-    const tVar=tFev>0?((tMar-tFev)/tFev*100):0;
-    const rows=teamOps.map(o=>{
-      const mb=Math.max(o.fev.total,o.mar.total,1);
-      return`<tr>
-        <td class="left">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div style="width:26px;height:26px;border-radius:50%;background:${o.color};color:${o.tc};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">${o.initials}</div>
-            <div>
-              <div style="font-weight:600;font-size:12px;">${o.name}</div>
-              <div style="font-size:10px;color:#aaa;">${o.sub} · ${o.ativo?'Ativo':'Desligado'}</div>
-            </div>
-          </div>
-        </td>
-        <td>
-          <div style="font-size:12px;">${fmtV(o.fev.total)}</div>
-          <div class="pct-bar-bg" style="margin-top:3px;"><div class="pct-bar" style="width:${(o.fev.total/mb*100).toFixed(0)}%;background:#93c5fd;"></div></div>
-        </td>
-        <td>
-          <div style="font-size:12px;">${fmtV(o.mar.total)}</div>
-          <div class="pct-bar-bg" style="margin-top:3px;"><div class="pct-bar" style="width:${(o.mar.total/mb*100).toFixed(0)}%;background:#6ee7b7;"></div></div>
-        </td>
-        <td class="center">${vBadge(o.fev.total,o.mar.total)}</td>
-      </tr>`;
+  function renderP3(){
+    const box=document.getElementById('p3-result');
+    if(selP3.size===0){box.innerHTML='<div class="empty">Selecione um ou mais operadores acima</div>';return;}
+    const sel=[...selP3].map(i=>ops[i]);
+    const totalPorDia=diasNome.map((_,d)=>sel.reduce((s,o)=>s+o.mediaDia[d],0));
+    const maxDia=Math.max(...totalPorDia,1);
+    const dayCards=diasNome.map((nome,d)=>`
+      <div class="day-card" style="background:${diasCor[d]};">
+        <div class="dl" style="color:${diasTxt[d]}">${nome}</div>
+        <div class="dv" style="color:${diasTxt[d]}">${P_fmt0(totalPorDia[d])}</div>
+        <div class="mini-bar" style="background:${diasBar[d]};width:${(totalPorDia[d]/maxDia*100).toFixed(0)}%;margin:4px auto 0;"></div>
+      </div>`).join('');
+    const rows=sel.map(o=>{
+      const cells=o.mediaDia.map((v,d)=>`<td>${v>0?P_fmt0(v):'—'}${v>0?`<div class="mini-bar" style="background:${diasBar[d]};width:${(v/maxDia*100).toFixed(0)}%;margin:2px auto 0;"></div>`:'' }</td>`).join('');
+      return`<tr><td class="left">${o.name}<br><span style="font-size:10px;color:#aaa;">${o.equipe} · ${o.tag}</span></td>${cells}</tr>`;
     }).join('');
-    const tvb=tVar>=0?`<span class="badge-up">+${tVar.toFixed(1)}%</span>`:`<span class="badge-dn">${tVar.toFixed(1)}%</span>`;
-    return`<div class="team-block">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div class="team-title" style="color:${color};margin-bottom:0;">${label}</div>
-        <div style="display:flex;gap:8px;font-size:12px;color:#888;">
-          <span>Fev: <b style="color:#1a1a2e;">${fmt0(tFev)}</b></span>
-          <span>Mar: <b style="color:#1a1a2e;">${fmt0(tMar)}</b></span>
-          ${tvb}
-        </div>
-      </div>
+    box.innerHTML=`
+      <div class="sec-label" style="margin-bottom:10px;">Produção média por dia — ${sel.length} operador${sel.length>1?'es':''}</div>
+      <div class="g5">${dayCards}</div>
+      <hr class="divider">
       <div style="overflow-x:auto;">
         <table class="op-table">
-          <thead><tr><th class="left">Operador</th><th style="text-align:right;">Fevereiro</th><th style="text-align:right;">Março</th><th>Variação</th></tr></thead>
+          <thead><tr><th class="left">Operador</th>${diasNome.map(n=>`<th>${n}</th>`).join('')}</tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
-    </div>`;
+      <div style="font-size:11px;color:#bbb;margin-top:8px;">Média dos dias com produção em março.</div>`;
   }
 
-  cont.innerHTML=`
-    <div class="g4" style="margin-bottom:16px;">
-      <div class="m mb"><div class="ml">Total Fevereiro</div><div class="mv">${fmt0(totalFev)}</div></div>
-      <div class="m mg"><div class="ml">Total Março</div><div class="mv">${fmt0(totalMar)}</div></div>
-      <div class="m ${varTotal>=0?'mg':'mr'}"><div class="ml">Variação geral</div><div class="mv">${varTotal>=0?'+':''}${varTotal.toFixed(1)}%</div></div>
-      <div class="m mn"><div class="ml">Diferença</div><div class="mv">${fmt0(Math.abs(totalMar-totalFev))}</div></div>
-    </div>
-    <div class="g2" style="margin-bottom:16px;">
-      <div class="m mn">
-        <div class="ml">UME — Fev vs Mar</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
-          <div class="mv">${fmt0(umeFev)} → ${fmt0(umeMar)}</div>
-          <span class="${varUme>=0?'badge-up':'badge-dn'}">${varUme>=0?'+':''}${varUme.toFixed(1)}%</span>
+  function renderP4(){
+    const cont=document.getElementById('p4-content');
+    const totalFev=ops.reduce((s,o)=>s+o.fev.total,0);
+    const totalMar=ops.reduce((s,o)=>s+o.mar.total,0);
+    const varTotal=totalFev>0?((totalMar-totalFev)/totalFev*100):0;
+    const umeOps=ops.filter(o=>o.equipe==='UME');
+    const odresOps=ops.filter(o=>o.equipe==='ODRES');
+    const umeFev=umeOps.reduce((s,o)=>s+o.fev.total,0);
+    const umeMar=umeOps.reduce((s,o)=>s+o.mar.total,0);
+    const odresFev=odresOps.reduce((s,o)=>s+o.fev.total,0);
+    const odresMar=odresOps.reduce((s,o)=>s+o.mar.total,0);
+    const varUme=umeFev>0?((umeMar-umeFev)/umeFev*100):0;
+    const varOdres=odresFev>0?((odresMar-odresFev)/odresFev*100):0;
+    function vBadge(fev,mar){
+      if(fev===0&&mar===0)return'<span class="badge-eq">—</span>';
+      if(fev===0)return'<span class="badge-new">novo</span>';
+      if(mar===0)return'<span class="badge-desl">inativo</span>';
+      const v=(mar-fev)/fev*100;
+      return v>=0?`<span class="badge-up">+${v.toFixed(1)}%</span>`:`<span class="badge-dn">${v.toFixed(1)}%</span>`;
+    }
+    function teamTable(label,color,teamOps){
+      const tFev=teamOps.reduce((s,o)=>s+o.fev.total,0);
+      const tMar=teamOps.reduce((s,o)=>s+o.mar.total,0);
+      const tVar=tFev>0?((tMar-tFev)/tFev*100):0;
+      const rows=teamOps.map(o=>{
+        const mb=Math.max(o.fev.total,o.mar.total,1);
+        return`<tr>
+          <td class="left"><div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:26px;height:26px;border-radius:50%;background:${o.color};color:${o.tc};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">${o.initials}</div>
+            <div><div style="font-weight:600;font-size:12px;">${o.name}</div><div style="font-size:10px;color:#aaa;">${o.sub} · ${o.ativo?'Ativo':'Desligado'}</div></div>
+          </div></td>
+          <td><div style="font-size:12px;">${P_fmtV(o.fev.total)}</div><div class="pct-bar-bg" style="margin-top:3px;"><div class="pct-bar" style="width:${(o.fev.total/mb*100).toFixed(0)}%;background:#14cb53;"></div></div></td>
+          <td><div style="font-size:12px;">${P_fmtV(o.mar.total)}</div><div class="pct-bar-bg" style="margin-top:3px;"><div class="pct-bar" style="width:${(o.mar.total/mb*100).toFixed(0)}%;background:#6ee7b7;"></div></div></td>
+          <td class="center">${vBadge(o.fev.total,o.mar.total)}</td></tr>`;
+      }).join('');
+      const tvb=tVar>=0?`<span class="badge-up">+${tVar.toFixed(1)}%</span>`:`<span class="badge-dn">${tVar.toFixed(1)}%</span>`;
+      return`<div class="team-block">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div class="team-title" style="color:${color};margin-bottom:0;">${label}</div>
+          <div style="display:flex;gap:8px;font-size:12px;color:#888;">
+            <span>Fev: <b style="color:#f3f4f6;">${P_fmt0(tFev)}</b></span>
+            <span>Mar: <b style="color:#f3f4f6;">${P_fmt0(tMar)}</b></span>
+            ${tvb}
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="op-table">
+            <thead><tr><th class="left">Operador</th><th style="text-align:right;">Fevereiro</th><th style="text-align:right;">Março</th><th>Variação</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+    }
+    cont.innerHTML=`
+      <div class="g4" style="margin-bottom:16px;">
+        <div class="m mb"><div class="ml">Total Fevereiro</div><div class="mv">${P_fmt0(totalFev)}</div></div>
+        <div class="m mg"><div class="ml">Total Março</div><div class="mv">${P_fmt0(totalMar)}</div></div>
+        <div class="m ${varTotal>=0?'mg':'mr'}"><div class="ml">Variação geral</div><div class="mv">${varTotal>=0?'+':''}${varTotal.toFixed(1)}%</div></div>
+        <div class="m mn"><div class="ml">Diferença</div><div class="mv">${P_fmt0(Math.abs(totalMar-totalFev))}</div></div>
+      </div>
+      <div class="g2" style="margin-bottom:16px;">
+        <div class="m mn"><div class="ml">UME — Fev vs Mar</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+            <div class="mv">${P_fmt0(umeFev)} → ${P_fmt0(umeMar)}</div>
+            <span class="${varUme>=0?'badge-up':'badge-dn'}">${varUme>=0?'+':''}${varUme.toFixed(1)}%</span>
+          </div>
+        </div>
+        <div class="m mn"><div class="ml">ODRES — Fev vs Mar</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+            <div class="mv">${P_fmt0(odresFev)} → ${P_fmt0(odresMar)}</div>
+            <span class="${varOdres>=0?'badge-up':'badge-dn'}">${varOdres>=0?'+':''}${varOdres.toFixed(1)}%</span>
+          </div>
         </div>
       </div>
-      <div class="m mn">
-        <div class="ml">ODRES — Fev vs Mar</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
-          <div class="mv">${fmt0(odresFev)} → ${fmt0(odresMar)}</div>
-          <span class="${varOdres>=0?'badge-up':'badge-dn'}">${varOdres>=0?'+':''}${varOdres.toFixed(1)}%</span>
+      <div style="display:flex;gap:12px;margin-bottom:12px;font-size:12px;color:#888;">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#14cb53;display:inline-block;"></span>Fevereiro</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#6ee7b7;display:inline-block;"></span>Março</span>
+      </div>
+      ${teamTable('UME','#60a5fa',umeOps)}
+      ${teamTable('ODRES','#34d399',odresOps)}`;
+  }
+})(); // end Painel IIFE
+</script>
+
+<!-- ══════════ ANÁLISE DISCADOR JS (namespaced) ══════════ -->
+<script>
+(function() {
+  // All discador vars scoped in IIFE
+
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+const D = {"fev_days": [{"data": "02/02", "dia": "seg", "op": 9, "lig": 561, "trab": 0.6495, "pausa": 0.3505, "falado": 0.1407, "ocioso": 0.5088}, {"data": "03/02", "dia": "ter", "op": 12, "lig": 825, "trab": 0.6902, "pausa": 0.3098, "falado": 0.1752, "ocioso": 0.515}, {"data": "04/02", "dia": "qua", "op": 12, "lig": 527, "trab": 0.4243, "pausa": 0.5757, "falado": 0.1341, "ocioso": 0.2902}, {"data": "05/02", "dia": "qui", "op": 12, "lig": 576, "trab": 0.7949, "pausa": 0.2051, "falado": 0.1402, "ocioso": 0.6547}, {"data": "06/02", "dia": "sex", "op": 11, "lig": 1018, "trab": 0.7418, "pausa": 0.2582, "falado": 0.1877, "ocioso": 0.554}, {"data": "09/02", "dia": "seg", "op": 10, "lig": 720, "trab": 0.6902, "pausa": 0.3098, "falado": 0.1818, "ocioso": 0.5084}, {"data": "10/02", "dia": "ter", "op": 11, "lig": 1148, "trab": 0.5751, "pausa": 0.4249, "falado": 0.2592, "ocioso": 0.3158}, {"data": "11/02", "dia": "qua", "op": 11, "lig": 809, "trab": 0.6176, "pausa": 0.3824, "falado": 0.1774, "ocioso": 0.4403}, {"data": "12/02", "dia": "qui", "op": 11, "lig": 767, "trab": 0.6107, "pausa": 0.3893, "falado": 0.1762, "ocioso": 0.4345}, {"data": "13/02", "dia": "sex", "op": 9, "lig": 341, "trab": 0.6248, "pausa": 0.3752, "falado": 0.08, "ocioso": 0.5447}, {"data": "16/02", "dia": "seg", "op": 6, "lig": 333, "trab": 0.791, "pausa": 0.209, "falado": 0.1025, "ocioso": 0.6885}, {"data": "17/02", "dia": "ter", "op": 6, "lig": 615, "trab": 0.7181, "pausa": 0.2819, "falado": 0.2037, "ocioso": 0.5144}, {"data": "18/02", "dia": "qua", "op": 12, "lig": 441, "trab": 0.84, "pausa": 0.16, "falado": 0.1509, "ocioso": 0.6891}, {"data": "19/02", "dia": "qui", "op": 13, "lig": 678, "trab": 0.5764, "pausa": 0.4236, "falado": 0.1324, "ocioso": 0.444}, {"data": "20/02", "dia": "sex", "op": 12, "lig": 925, "trab": 0.5917, "pausa": 0.4083, "falado": 0.1887, "ocioso": 0.4029}, {"data": "23/02", "dia": "seg", "op": 10, "lig": 770, "trab": 0.6037, "pausa": 0.3963, "falado": 0.1697, "ocioso": 0.434}, {"data": "24/02", "dia": "ter", "op": 10, "lig": 682, "trab": 0.6554, "pausa": 0.3446, "falado": 0.1551, "ocioso": 0.5003}, {"data": "25/02", "dia": "qua", "op": 10, "lig": 942, "trab": 0.6567, "pausa": 0.3433, "falado": 0.1766, "ocioso": 0.4801}, {"data": "26/02", "dia": "qui", "op": 10, "lig": 859, "trab": 0.6009, "pausa": 0.3991, "falado": 0.1707, "ocioso": 0.4302}, {"data": "27/02", "dia": "sex", "op": 11, "lig": 631, "trab": 0.5923, "pausa": 0.4077, "falado": 0.11, "ocioso": 0.4823}], "mar_days": [{"data": "02/03", "dia": "seg", "op": 8, "lig": 564, "trab": 0.5535, "pausa": 0.4465, "falado": 0.1867, "ocioso": 0.3669}, {"data": "03/03", "dia": "ter", "op": 10, "lig": 588, "trab": 0.5728, "pausa": 0.4272, "falado": 0.1124, "ocioso": 0.4604}, {"data": "04/03", "dia": "qua", "op": 9, "lig": 527, "trab": 0.6424, "pausa": 0.3576, "falado": 0.1295, "ocioso": 0.513}, {"data": "05/03", "dia": "qui", "op": 11, "lig": 480, "trab": 0.6245, "pausa": 0.3755, "falado": 0.0674, "ocioso": 0.5571}, {"data": "06/03", "dia": "sex", "op": 11, "lig": 573, "trab": 0.5383, "pausa": 0.4617, "falado": 0.1068, "ocioso": 0.4315}, {"data": "09/03", "dia": "seg", "op": 9, "lig": 439, "trab": 0.5905, "pausa": 0.4095, "falado": 0.1203, "ocioso": 0.4702}, {"data": "10/03", "dia": "ter", "op": 11, "lig": 335, "trab": 0.6172, "pausa": 0.3828, "falado": 0.1062, "ocioso": 0.511}, {"data": "11/03", "dia": "qua", "op": 10, "lig": 204, "trab": 0.6206, "pausa": 0.3794, "falado": 0.0555, "ocioso": 0.565}, {"data": "12/03", "dia": "qui", "op": 12, "lig": 646, "trab": 0.5877, "pausa": 0.4123, "falado": 0.1023, "ocioso": 0.4854}, {"data": "13/03", "dia": "sex", "op": 10, "lig": 160, "trab": 0.5788, "pausa": 0.4212, "falado": 0.0348, "ocioso": 0.544}, {"data": "16/03", "dia": "seg", "op": 10, "lig": 595, "trab": 0.7094, "pausa": 0.2906, "falado": 0.1655, "ocioso": 0.5439}, {"data": "17/03", "dia": "ter", "op": 12, "lig": 128, "trab": 0.6888, "pausa": 0.3112, "falado": 0.0334, "ocioso": 0.6555}, {"data": "18/03", "dia": "qua", "op": 12, "lig": 867, "trab": 0.6965, "pausa": 0.3035, "falado": 0.1726, "ocioso": 0.5239}, {"data": "19/03", "dia": "qui", "op": 12, "lig": 425, "trab": 0.6635, "pausa": 0.3365, "falado": 0.0997, "ocioso": 0.5638}, {"data": "20/03", "dia": "sex", "op": 12, "lig": 802, "trab": 0.6886, "pausa": 0.3114, "falado": 0.1226, "ocioso": 0.5659}, {"data": "23/03", "dia": "seg", "op": 10, "lig": 592, "trab": 0.6506, "pausa": 0.3494, "falado": 0.1095, "ocioso": 0.5411}, {"data": "24/03", "dia": "ter", "op": 11, "lig": 549, "trab": 0.6612, "pausa": 0.3388, "falado": 0.098, "ocioso": 0.5632}, {"data": "25/03", "dia": "qua", "op": 9, "lig": 249, "trab": 0.6482, "pausa": 0.3518, "falado": 0.0547, "ocioso": 0.5935}, {"data": "26/03", "dia": "qui", "op": 8, "lig": 255, "trab": 0.7123, "pausa": 0.2877, "falado": 0.068, "ocioso": 0.6443}, {"data": "27/03", "dia": "sex", "op": 9, "lig": 302, "trab": 0.4293, "pausa": 0.5707, "falado": 0.0807, "ocioso": 0.3487}, {"data": "30/03", "dia": "seg", "op": 7, "lig": 190, "trab": 0.712, "pausa": 0.288, "falado": 0.056, "ocioso": 0.6561}, {"data": "31/03", "dia": "ter", "op": 9, "lig": 426, "trab": 0.6892, "pausa": 0.3108, "falado": 0.0857, "ocioso": 0.6035}], "abr_days": [{"data": "01/04", "dia": "qua", "op": 9, "lig": 401, "trab": 0.6875, "pausa": 0.3125, "falado": 0.1482, "ocioso": 0.5393}, {"data": "02/04", "dia": "qui", "op": 8, "lig": 278, "trab": 0.6327, "pausa": 0.3673, "falado": 0.0661, "ocioso": 0.5666}, {"data": "03/04", "dia": "sex", "op": 2, "lig": 62, "trab": 0.8466, "pausa": 0.1534, "falado": 0.0403, "ocioso": 0.8063}, {"data": "06/04", "dia": "seg", "op": 6, "lig": 165, "trab": 0.7023, "pausa": 0.2977, "falado": 0.0346, "ocioso": 0.6677}, {"data": "07/04", "dia": "ter", "op": 8, "lig": 247, "trab": 0.6242, "pausa": 0.3758, "falado": 0.0406, "ocioso": 0.5836}, {"data": "08/04", "dia": "qua", "op": 9, "lig": 518, "trab": 0.6101, "pausa": 0.3899, "falado": 0.0886, "ocioso": 0.5215}, {"data": "09/04", "dia": "qui", "op": 8, "lig": 425, "trab": 0.5224, "pausa": 0.4776, "falado": 0.0776, "ocioso": 0.4448}, {"data": "10/04", "dia": "sex", "op": 8, "lig": 357, "trab": 0.5474, "pausa": 0.4526, "falado": 0.0673, "ocioso": 0.4802}, {"data": "13/04", "dia": "seg", "op": 6, "lig": 173, "trab": 0.5991, "pausa": 0.4009, "falado": 0.0342, "ocioso": 0.5649}, {"data": "14/04", "dia": "ter", "op": 8, "lig": 467, "trab": 0.7363, "pausa": 0.2637, "falado": 0.1067, "ocioso": 0.6296}, {"data": "15/04", "dia": "qua", "op": 9, "lig": 219, "trab": 0.5293, "pausa": 0.4707, "falado": 0.0382, "ocioso": 0.4911}, {"data": "16/04", "dia": "qui", "op": 8, "lig": 322, "trab": 0.7065, "pausa": 0.2935, "falado": 0.0556, "ocioso": 0.6509}, {"data": "17/04", "dia": "sex", "op": 9, "lig": 377, "trab": 0.6341, "pausa": 0.3659, "falado": 0.0624, "ocioso": 0.5718}, {"data": "20/04", "dia": "seg", "op": 7, "lig": 386, "trab": 0.6865, "pausa": 0.3135, "falado": 0.0827, "ocioso": 0.6038}, {"data": "21/04", "dia": "ter", "op": 3, "lig": 0, "trab": 0.5851, "pausa": 0.4149, "falado": 0.0, "ocioso": 0.5851}], "fev_eq": [{"data": "02/02", "dia": "seg", "op": 9, "lig": 561, "trab": 0.6495, "pausa": 0.3505, "falado": 0.1407, "ocioso": 0.5088}, {"data": "03/02", "dia": "ter", "op": 12, "lig": 825, "trab": 0.6902, "pausa": 0.3098, "falado": 0.1752, "ocioso": 0.515}, {"data": "04/02", "dia": "qua", "op": 12, "lig": 527, "trab": 0.4243, "pausa": 0.5757, "falado": 0.1341, "ocioso": 0.2902}, {"data": "05/02", "dia": "qui", "op": 12, "lig": 576, "trab": 0.7949, "pausa": 0.2051, "falado": 0.1402, "ocioso": 0.6547}, {"data": "06/02", "dia": "sex", "op": 11, "lig": 1018, "trab": 0.7418, "pausa": 0.2582, "falado": 0.1877, "ocioso": 0.554}, {"data": "09/02", "dia": "seg", "op": 10, "lig": 720, "trab": 0.6902, "pausa": 0.3098, "falado": 0.1818, "ocioso": 0.5084}, {"data": "10/02", "dia": "ter", "op": 11, "lig": 1148, "trab": 0.5751, "pausa": 0.4249, "falado": 0.2592, "ocioso": 0.3158}, {"data": "11/02", "dia": "qua", "op": 11, "lig": 809, "trab": 0.6176, "pausa": 0.3824, "falado": 0.1774, "ocioso": 0.4403}, {"data": "12/02", "dia": "qui", "op": 11, "lig": 767, "trab": 0.6107, "pausa": 0.3893, "falado": 0.1762, "ocioso": 0.4345}, {"data": "13/02", "dia": "sex", "op": 9, "lig": 341, "trab": 0.6248, "pausa": 0.3752, "falado": 0.08, "ocioso": 0.5447}, {"data": "16/02", "dia": "seg", "op": 6, "lig": 333, "trab": 0.791, "pausa": 0.209, "falado": 0.1025, "ocioso": 0.6885}, {"data": "17/02", "dia": "ter", "op": 6, "lig": 615, "trab": 0.7181, "pausa": 0.2819, "falado": 0.2037, "ocioso": 0.5144}, {"data": "18/02", "dia": "qua", "op": 12, "lig": 441, "trab": 0.84, "pausa": 0.16, "falado": 0.1509, "ocioso": 0.6891}, {"data": "19/02", "dia": "qui", "op": 13, "lig": 678, "trab": 0.5764, "pausa": 0.4236, "falado": 0.1324, "ocioso": 0.444}, {"data": "20/02", "dia": "sex", "op": 12, "lig": 925, "trab": 0.5917, "pausa": 0.4083, "falado": 0.1887, "ocioso": 0.4029}], "mar_eq": [{"data": "02/03", "dia": "seg", "op": 8, "lig": 564, "trab": 0.5535, "pausa": 0.4465, "falado": 0.1867, "ocioso": 0.3669}, {"data": "03/03", "dia": "ter", "op": 10, "lig": 588, "trab": 0.5728, "pausa": 0.4272, "falado": 0.1124, "ocioso": 0.4604}, {"data": "04/03", "dia": "qua", "op": 9, "lig": 527, "trab": 0.6424, "pausa": 0.3576, "falado": 0.1295, "ocioso": 0.513}, {"data": "05/03", "dia": "qui", "op": 11, "lig": 480, "trab": 0.6245, "pausa": 0.3755, "falado": 0.0674, "ocioso": 0.5571}, {"data": "06/03", "dia": "sex", "op": 11, "lig": 573, "trab": 0.5383, "pausa": 0.4617, "falado": 0.1068, "ocioso": 0.4315}, {"data": "09/03", "dia": "seg", "op": 9, "lig": 439, "trab": 0.5905, "pausa": 0.4095, "falado": 0.1203, "ocioso": 0.4702}, {"data": "10/03", "dia": "ter", "op": 11, "lig": 335, "trab": 0.6172, "pausa": 0.3828, "falado": 0.1062, "ocioso": 0.511}, {"data": "11/03", "dia": "qua", "op": 10, "lig": 204, "trab": 0.6206, "pausa": 0.3794, "falado": 0.0555, "ocioso": 0.565}, {"data": "12/03", "dia": "qui", "op": 12, "lig": 646, "trab": 0.5877, "pausa": 0.4123, "falado": 0.1023, "ocioso": 0.4854}, {"data": "13/03", "dia": "sex", "op": 10, "lig": 160, "trab": 0.5788, "pausa": 0.4212, "falado": 0.0348, "ocioso": 0.544}, {"data": "16/03", "dia": "seg", "op": 10, "lig": 595, "trab": 0.7094, "pausa": 0.2906, "falado": 0.1655, "ocioso": 0.5439}, {"data": "17/03", "dia": "ter", "op": 12, "lig": 128, "trab": 0.6888, "pausa": 0.3112, "falado": 0.0334, "ocioso": 0.6555}, {"data": "18/03", "dia": "qua", "op": 12, "lig": 867, "trab": 0.6965, "pausa": 0.3035, "falado": 0.1726, "ocioso": 0.5239}, {"data": "19/03", "dia": "qui", "op": 12, "lig": 425, "trab": 0.6635, "pausa": 0.3365, "falado": 0.0997, "ocioso": 0.5638}, {"data": "20/03", "dia": "sex", "op": 12, "lig": 802, "trab": 0.6886, "pausa": 0.3114, "falado": 0.1226, "ocioso": 0.5659}], "n_eq": 15, "ts_fev": {"du": 20, "lig_total": 14168, "trab": 0.6523, "pausa": 0.3477, "falado": 0.1606, "ocioso": 0.4916, "pausa_viol": 13}, "ts_mar": {"du": 22, "lig_total": 9896, "trab": 0.6307, "pausa": 0.3693, "falado": 0.0986, "ocioso": 0.5322, "pausa_viol": 13}, "ts_abr": {"du": 15, "lig_total": 4397, "trab": 0.6433, "pausa": 0.3567, "falado": 0.0629, "ocioso": 0.5805, "pausa_viol": 9}, "ts_fev_eq": {"du": 15, "lig_total": 10284, "trab": 0.6624, "pausa": 0.3376, "falado": 0.162, "ocioso": 0.5004, "pausa_viol": 8}, "ts_mar_eq": {"du": 15, "lig_total": 7333, "trab": 0.6249, "pausa": 0.3751, "falado": 0.1077, "ocioso": 0.5172, "pausa_viol": 10}, "funil_fev": {"mailing": 442376, "trabalhado": 26355, "pct_trab": 0.05957601678210391, "tentativas": 313877, "spin": 0.7095, "pct_alo": 0.0301, "pct_cpc": 0.4135, "pct_conv": 0.47, "alo": 9463, "cpc": 3913, "conversao": 1839, "pagamento": 1197, "receita": 224341.41, "ticket": 187.42, "telefonia": 2353.39}, "funil_mar": {"mailing": 471998, "trabalhado": 31355, "pct_trab": 0.06643036623036538, "tentativas": 247154, "spin": 0.5236, "pct_alo": 0.0237, "pct_cpc": 0.4312, "pct_conv": 0.3773, "alo": 5851, "cpc": 2523, "conversao": 952, "pagamento": 559, "receita": 109910.98, "ticket": 196.62, "telefonia": 1082.26}, "funil_abr": {"mailing": 509401, "trabalhado": 19346, "pct_trab": 0.037977938794780536, "tentativas": 139468, "spin": 0.2738, "pct_alo": 0.0245, "pct_cpc": 0.3936, "pct_conv": 0.3812, "alo": 3412, "cpc": 1343, "conversao": 512, "pagamento": 215, "receita": 39471.36, "ticket": 183.59, "telefonia": 620.09}};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let period = 'fev_mar';   // 'fev_mar' | 'fev_mar_abr'
+let op     = 'ume';       // 'ume' | 'odres'
+
+// ─────────────────────────────────────────────
+// STATIC CONTENT DATA
+// ─────────────────────────────────────────────
+const CONTENT = {
+  ume: {
+    exec: {
+      fev_mar: `Entre <strong>Fevereiro e Março fechados</strong>, a UME registrou queda severa de volume: Alôs caíram <span class="r">−38%</span>, pagamentos <span class="r">−54%</span> e receita <span class="r">−51%</span> — <strong>sem alerta formal ou ação corretiva</strong>. O ticket médio subiu de <span class="g">R$ 187 → R$ 197</span>, indicando que os operadores remanescentes convertem clientes de maior valor. <strong>Risco iminente:</strong> desligamentos de Vitória, Pamela e afastamento de Raquel em Abril representam <span class="r">R$ 55k/mês</span> em risco, sem protocolo de contingência ativo.`,
+      fev_mar_abr: `Comparando os <strong>mesmos 15 dias úteis</strong> de Fev, Mar e Abr, a UME mostra queda progressiva de volume em todas as etapas do funil. A conversão em Abril foi impactada diretamente pela redução de headcount — 3 das 6 operadoras saíram desde 01/04. <strong>Ponto positivo:</strong> os operadores que permaneceram mantiveram <span class="g">qualidade individual</span> — % Trabalhado estável e pausa melhorou.`
+    },
+    sem: {
+      fev_mar: [
+        {lbl:'CPC sobre Alô',    val:'45,0%', delta:'▲ vs Fev 41,4%', dclass:'up', status:'red',    bench:'Benchmark mín: 54%'},
+        {lbl:'Conversão s/ CPC', val:'37,7%', delta:'▼ vs Fev 47,0%', dclass:'dn', status:'red',    bench:'Benchmark mín: 56%'},
+        {lbl:'% Tempo Falado',   val:'10,8%', delta:'▼ vs Fev 16,1%', dclass:'dn', status:'red',    bench:'Benchmark mín: 19%'},
+        {lbl:'% Pausa',          val:'39,7%', delta:'▲ vs Fev 34,8%', dclass:'dn', status:'red',    bench:'Desired: ≤34% · 77% dias violando'},
+        {lbl:'% TP Trabalhado',  val:'60,3%', delta:'▼ vs Fev 65,2%', dclass:'dn', status:'red',    bench:'Benchmark mín: 63%'},
+        {lbl:'Pagamentos',       val:'554',   delta:'▼ −54% vs Fev',  dclass:'dn', status:'red',    bench:'Fev: 1.197'},
+        {lbl:'Receita',          val:'R$109k',delta:'▼ −51% vs Fev',  dclass:'dn', status:'red',    bench:'Fev: R$ 224k'},
+        {lbl:'THD Operadora',    val:'56,5%', delta:'(referência Mar)',dclass:'fl', status:'yellow', bench:'Odres: 71,8% 🔴'},
+      ],
+      fev_mar_abr: [
+        {lbl:'CPC sobre Alô',    val:'39,4%', delta:'▼ Fev 41,4%→Mar 45%→Abr 39%',dclass:'dn',status:'red',   bench:'Benchmark mín: 54%'},
+        {lbl:'Conversão s/ CPC', val:'38,1%', delta:'▼ vs Fev (mesmo DU)',          dclass:'dn',status:'red',   bench:'Benchmark mín: 56%'},
+        {lbl:'% Falado (médio)',  val:'6,3%',  delta:'▼ Abr vs Fev 16,2%',          dclass:'dn',status:'red',   bench:'Benchmark mín: 19%'},
+        {lbl:'% Pausa (Abr)',     val:'35,7%', delta:'▲ vs Mar eq. 37,5%',          dclass:'up',status:'yellow',bench:'Desired: ≤34%'},
+        {lbl:'% TP Trabalhado',   val:'64,3%', delta:'▲ vs Mar eq. 62,5%',          dclass:'up',status:'yellow',bench:'Benchmark mín: 63%'},
+        {lbl:'Pagamentos (Abr)',  val:'215',   delta:'▼ vs Fev eq. ~900',           dclass:'dn',status:'red',   bench:'Impacto headcount Abr'},
+        {lbl:'Receita (Abr)',     val:'R$39k', delta:'▼ vs Fev eq.',                dclass:'dn',status:'red',   bench:'Fev mesmo DU: ~R$168k'},
+        {lbl:'Operadores Abr',    val:'~7,5',  delta:'▼ de ~10 em Fev/Mar',         dclass:'dn',status:'red',   bench:'Equipe reduzida desde 01/04'},
+      ],
+    },
+    bm: {
+      fev_mar: [
+        {m:'CPC sobre Alô',   g:'≥64%',d:'62%',y:'59%',r:'≤54%', v1:'45,0% 🔴', v2:'', cl1:'ccr'},
+        {m:'Conversão s/ CPC',g:'≥66%',d:'64%',y:'61%',r:'≤56%', v1:'37,7% 🔴', v2:'', cl1:'ccr'},
+        {m:'% Tempo Falado',  g:'≥23%',d:'21%',y:'19%',r:'≤15%', v1:'10,8% 🔴', v2:'', cl1:'ccr'},
+        {m:'% Pausa',         g:'≤31%',d:'34%',y:'37%',r:'≥40%', v1:'39,7% 🟡', v2:'', cl1:'cwn'},
+        {m:'% TP Trabalhado', g:'≥69%',d:'66%',y:'63%',r:'≤60%', v1:'60,3% 🔴', v2:'', cl1:'ccr'},
+      ],
+      fev_mar_abr: [
+        {m:'CPC sobre Alô',   g:'≥64%',d:'62%',y:'59%',r:'≤54%', v1:'45,0% 🔴',v2:'45,0% 🔴',v3:'39,4% 🔴',cl1:'ccr',cl2:'ccr',cl3:'ccr'},
+        {m:'Conversão s/ CPC',g:'≥66%',d:'64%',y:'61%',r:'≤56%', v1:'47,0% 🔴',v2:'38,1% 🔴',v3:'38,1% 🔴',cl1:'ccr',cl2:'ccr',cl3:'ccr'},
+        {m:'% Tempo Falado',  g:'≥23%',d:'21%',y:'19%',r:'≤15%', v1:'16,2% 🔴',v2:'10,8% 🔴',v3:'6,3% 🔴', cl1:'ccr',cl2:'ccr',cl3:'ccr'},
+        {m:'% Pausa',         g:'≤31%',d:'34%',y:'37%',r:'≥40%', v1:'33,8% 🟢',v2:'37,5% 🟡',v3:'35,7% 🟡',cl1:'cok',cl2:'cwn',cl3:'cwn'},
+        {m:'% TP Trabalhado', g:'≥69%',d:'66%',y:'63%',r:'≤60%', v1:'66,2% 🟡',v2:'62,5% 🟡',v3:'64,3% 🟡',cl1:'cwn',cl2:'cwn',cl3:'cwn'},
+      ],
+    },
+    alerts: [
+      {type:'cr', icon:'🚨', title:'Alerta 1 — Redução de Headcount: Vitória + Pamela + Raquel',
+       sub:'Risco ativo desde 01/04 · Equipe passou de 6 para 3 operadoras ativas',
+       fact:'Em Março fechado, Pamela Moreira e Vitória Ketelin representavam juntas <span class="neg">36% de todo o volume de ligações</span> do time (Pamela 16,9% · Vitória 7,5%). Os desligamentos de Abril eliminam essa capacidade sem protocolo de cobertura. Raquel afastada de 11–19/04 agrava ainda mais. Impacto projetado: <span class="neg">R$ 55.008/mês</span>.',
+       p5:['Por que o volume caiu?<span class="arr">→</span>Equipe reduziu de 6 para 3 — desligamentos simultâneos sem banco de reserva',
+           'Por que o impacto é tão alto?<span class="arr">→</span>Vitória sozinha respondia por R$ 44.771/mês (21,8% do fat. mês)',
+           'Por que sem substituição imediata?<span class="arr">→</span>Modelo reativo — contrata só quando há vaga aberta',
+           'Por que o discador não compensou?<span class="arr">→</span>Intensidade não foi reconfigurada para os 3 restantes cobrirem o volume',
+           'Por que sem protocolo?<span class="arr">→</span>Operação não tem plano formal de cobertura para perda de headcount']},
+      {type:'cr', icon:'🔴', title:'Alerta 2 — CPC sobre Alô abaixo do benchmark',
+       sub:'CPC em 45,0% em Março — benchmark mínimo é 54%',
+       fact:'O CPC melhorou levemente de Fev (41,4%) para Mar (45,0%), mas continua abaixo do mínimo de 54%. A queda de 53% nos Alôs vs Fevereiro é o principal driver — menos oportunidades chegando, mesmo com discador ativo.',
+       p5:['Por que o CPC está abaixo?<span class="arr">→</span>Volume de Alôs caiu 53% vs Fev — menos oportunidades',
+           'Por que menos Alôs?<span class="arr">→</span>Tentativas caíram 44% · Spin caiu de 0,71 para 0,52',
+           'Por que o Spin caiu?<span class="arr">→</span>Discador menos agressivo ou base com maior bloqueio',
+           'Por que sem ajuste no discador?<span class="arr">→</span>Sem protocolo de reconfiguração automática',
+           'Por que sem alerta?<span class="arr">→</span>Monitoramento de CPC não está formalizado com gatilho automático']},
+      {type:'wn', icon:'🟡', title:'Alerta 3 — % Tempo Falado em Red Alert',
+       sub:'10,8% em Março — 8pp abaixo do benchmark mínimo (19%) · queda de 33% vs Fevereiro',
+       fact:'Em 77% dos dias úteis de Março a pausa esteve acima de 34%. O % Falado caiu de 16,1% (Fev) para 10,8% (Mar) — o discador não entrega ligações suficientes, gerando ociosidade estagnada em ~49%.',
+       p5:['Por que % Falado tão baixo?<span class="arr">→</span>Ociosidade em 49% — discador não entrega Alôs suficientes',
+           'Por que menos Alôs?<span class="arr">→</span>Tentativas 44% menores e Spin em queda',
+           'Por que pausa alta em 77% dos dias?<span class="arr">→</span>Sem controle em tempo real pelo supervisor',
+           'Por que sem controle?<span class="arr">→</span>SLA de pausa individual não formalizado',
+           'Por que sem alerta?<span class="arr">→</span>Sistema não tem configuração de alerta por operador']},
+    ],
+    perf: {
+      head: ['Operador','CPC% Fev+Mar','Conv% Fev+Mar','Lig Fev+Mar','% Time','Status'],
+      rows: [
+        ['Andressa Bruna','—','—','2.011','11,1%','<span class="badge bgr">Sem dado individual</span>'],
+        ['Kayke Araujo','~40%','~50%','1.005','5,6%','<span class="badge br">🔴 Red CPC</span>'],
+        ['Pamela Isabelle','~31%','~43%','1.420','7,8%','<span class="badge br">🔴 Red CPC</span>'],
+        ['Rayara Danielle','~17%','~53%','744','4,1%','<span class="badge br">🔴 CPC Crítico</span>'],
+        ['Raquel Moreira','~32%','~47%','1.105','6,1%','<span class="badge by">⚠️ Risco afastamento</span>'],
+        ['Vitória Ketelin ✗','—','—','1.363','7,5%','<span class="badge br">Risco desligamento Abr</span>'],
+        ['Pamela Moreira ✗','—','—','3.053','16,9%','<span class="badge br">Risco desligamento Abr</span>'],
+      ]
+    },
+    insights: [
+      {n:'7',t:'p',title:'Queda estrutural já em Março, antes de Abril',body:'Com meses fechados, Março vs Fevereiro revela: receita <strong>−51%</strong>, Alôs <strong>−38%</strong>, pagamentos <strong>−54%</strong> — sem alerta formal. O Spin caiu de 0,71→0,52, indicando degradação do discador ou da base antes dos desligamentos de Abril.'},
+      {n:'8',t:'p',title:'Ticket médio subiu — qualidade de conversão melhorou',body:'Ticket médio: <strong>R$187 → R$197</strong>. ROI sobre telefonia: 95x → 101x. Os operadores estão convertendo clientes de maior valor — padrão que merece investigação e replicação.'},
+      {n:'9',t:'p',title:'"Atende e Desliga" — 38,3% das tabulações',body:'O maior desfecho negativo do daily Fev+Mar é "Atende e Desliga" (38,3% do total). Indica problema de <strong>abordagem/script</strong>, independente de headcount. Nenhuma ação mapeada para esse indicador.'},
+      {n:'10',t:'p',title:'Simone + Pamela = 36% do volume total do time',body:'No período fechado Fev+Mar: Simone (19%) + Pamela Moreira (16,9%) = <strong>36% de toda a capacidade operacional</strong>. Saída simultânea sem protocolo = catástrofe de volume.'},
+      {n:'11',t:'b',title:'PDI Kayke + Pamela Isabelle — Red CPC por 2 meses',body:'Kayke (38% CPC) e Pamela Isabelle (32% CPC) em Red há dois meses. Alto CPC de conversão sugere que o problema é na <strong>abordagem inicial</strong>, não na negociação. Escuta + feedback até 02/05.'},
+      {n:'12',t:'b',title:'PDI Beatris Santos — dois problemas simultâneos',body:'CPC em queda (42%→32%) + maior pausa individual. PDI rápido: escuta de 5 ligações até 30/04, alerta de pausa individual ativado, check-in diário primeiros 5 dias de Maio. Meta: CPC ≥40% e pausa ≤34% até 09/05.'},
+    ],
+  },
+
+  odres: {
+    exec: {
+      fev_mar: `A Odres em <strong>Março fechado</strong> já operava com sinais críticos: CPC em 53,5% (abaixo do mínimo de 54%), % Falado em apenas <span class="r">7%</span> e THD de Operadora em <span class="r">71,8%</span> — 3 em cada 4 ligações bloqueadas. A tabulação "Ligação Muda/Caixa Postal" representava <span class="r">24,8%</span> das ocorrências, indicando saturação de base em curso. <strong>Risco iminente:</strong> desligamento de Simone Gama em Abril representa <span class="r">R$ 53.381/mês</span> — maior impacto financeiro individual de todos os discadores.`,
+      fev_mar_abr: `Comparando os <strong>mesmos 15 dias úteis</strong>, a Odres em Abril sofreu colapso de CPC (53,5%→26,3%) impulsionado pela saturação de base — <span class="r">47% das ligações</span> vão para caixa postal. Com 73,7% de bloqueio de operadora + 47% caixa postal, o discador entrega pouquíssimas oportunidades reais de fala, resultando em <span class="r">51% de ociosidade</span>.`
+    },
+    sem: {
+      fev_mar: [
+        {lbl:'CPC sobre Alô',    val:'53,5%', delta:'(referência Mar)',  dclass:'fl', status:'yellow', bench:'Benchmark mín: 54% — 0,5pp abaixo'},
+        {lbl:'Conversão s/ CPC', val:'45,1%', delta:'(referência Mar)',  dclass:'fl', status:'yellow', bench:'Benchmark mín: 56%'},
+        {lbl:'% Tempo Falado',   val:'7%',    delta:'(referência Mar)',  dclass:'fl', status:'red',    bench:'Benchmark mín: 15% — metade do mínimo'},
+        {lbl:'% Pausa',          val:'40%',   delta:'(referência Mar)',  dclass:'dn', status:'red',    bench:'Red: ≥40% · Desired: ≤34%'},
+        {lbl:'% TP Trabalhado',  val:'49%',   delta:'(referência Mar)',  dclass:'fl', status:'red',    bench:'Benchmark mín: 63% — 14pp abaixo'},
+        {lbl:'Lig. Muda/CP',     val:'24,8%', delta:'Tendência ↑',       dclass:'dn', status:'yellow', bench:'Fev+Mar · Meta: manter <20%'},
+        {lbl:'THD Operadora',    val:'71,8%', delta:'(referência Mar)',  dclass:'fl', status:'red',    bench:'3 em cada 4 ligações bloqueadas'},
+        {lbl:'Receita Mar',      val:'R$17k', delta:'99 pagamentos',     dclass:'fl', status:'red',    bench:'Risco Simone em Abril: −R$53k'},
+      ],
+      fev_mar_abr: [
+        {lbl:'CPC sobre Alô',    val:'26,3%', delta:'▼ de 53,5% em Mar',dclass:'dn', status:'red',    bench:'Benchmark mín: 54% — queda de 27pp'},
+        {lbl:'Conversão s/ CPC', val:'52,3%', delta:'▲ de 45,1% em Mar',dclass:'up', status:'yellow', bench:'Benchmark mín: 56%'},
+        {lbl:'% Tempo Falado',   val:'7%',    delta:'estagnado',         dclass:'fl', status:'red',    bench:'Benchmark mín: 15%'},
+        {lbl:'% Pausa',          val:'32%',   delta:'▼ de 40% em Mar',  dclass:'up', status:'yellow', bench:'Melhora · Desired: ≤34%'},
+        {lbl:'% TP Trabalhado',  val:'58%',   delta:'▲ de 49% em Mar',  dclass:'up', status:'red',    bench:'Benchmark mín: 63% — ainda abaixo'},
+        {lbl:'Lig. Muda/CP',     val:'47%',   delta:'▲ 21pp vs Mar',    dclass:'dn', status:'red',    bench:'Meta: reduzir a <30%'},
+        {lbl:'THD Operadora',    val:'73,7%', delta:'▲ 2pp vs Mar',     dclass:'dn', status:'red',    bench:'3 em cada 4 ligações bloqueadas'},
+        {lbl:'Receita Abr',      val:'R$2k',  delta:'▼ −89% vs Mar',    dclass:'dn', status:'red',    bench:'13 pagamentos · Mar: R$17k'},
+      ],
+    },
+    bm: {
+      fev_mar: [
+        {m:'CPC sobre Alô',   g:'≥64%',d:'62%',y:'59%',r:'≤54%', v1:'53,5% 🟡', cl1:'cwn'},
+        {m:'Conversão s/ CPC',g:'≥66%',d:'64%',y:'61%',r:'≤56%', v1:'45,1% 🔴', cl1:'ccr'},
+        {m:'% Tempo Falado',  g:'≥23%',d:'21%',y:'19%',r:'≤15%', v1:'7% 🔴',    cl1:'ccr'},
+        {m:'% Pausa',         g:'≤31%',d:'34%',y:'37%',r:'≥40%', v1:'40% 🔴',   cl1:'ccr'},
+        {m:'% TP Trabalhado', g:'≥69%',d:'66%',y:'63%',r:'≤60%', v1:'49% 🔴',   cl1:'ccr'},
+      ],
+      fev_mar_abr: [
+        {m:'CPC sobre Alô',   g:'≥64%',d:'62%',y:'59%',r:'≤54%', v1:'53,5% 🟡',v2:'53,5% 🟡',v3:'26,3% 🔴',cl1:'cwn',cl2:'cwn',cl3:'ccr'},
+        {m:'Conversão s/ CPC',g:'≥66%',d:'64%',y:'61%',r:'≤56%', v1:'—',       v2:'45,1% 🔴',v3:'52,3% 🟡',cl1:'',  cl2:'ccr',cl3:'cwn'},
+        {m:'% Tempo Falado',  g:'≥23%',d:'21%',y:'19%',r:'≤15%', v1:'—',       v2:'7% 🔴',   v3:'7% 🔴',  cl1:'',  cl2:'ccr',cl3:'ccr'},
+        {m:'% Pausa',         g:'≤31%',d:'34%',y:'37%',r:'≥40%', v1:'—',       v2:'40% 🔴',  v3:'32% 🟡', cl1:'',  cl2:'ccr',cl3:'cwn'},
+        {m:'% TP Trabalhado', g:'≥69%',d:'66%',y:'63%',r:'≤60%', v1:'—',       v2:'49% 🔴',  v3:'58% 🔴', cl1:'',  cl2:'ccr',cl3:'ccr'},
+      ],
+    },
+    alerts: [
+      {type:'cr', icon:'🚨', title:'Alerta Headcount — Simone Gama Desligada',
+       sub:'Risco desde 01/04 · Maior impacto financeiro individual — 26% do faturamento mensal',
+       fact:'No período fechado Fev+Mar, Simone Gama foi responsável por <span class="neg">19% de todo o volume de ligações</span> do time (3.442 de 18.091 totais). Seu desligamento em Abril representa perda projetada de <span class="neg">R$ 53.381/mês</span> — o maior impacto individual entre todos os discadores analisados.',
+       p5:['Por que o volume está em risco?<span class="arr">→</span>Simone respondia por 19% do volume total — sem par de backup',
+           'Por que impacto tão alto?<span class="arr">→</span>Era a principal geradora de receita da Odres (26% fat. mensal)',
+           'Por que sem substituição?<span class="arr">→</span>Sem banco de reserva — modelo reativo de contratação',
+           'Por que sem cobertura no discador?<span class="arr">→</span>Intensidade não foi aumentada para os demais operadores',
+           'Por que sem protocolo?<span class="arr">→</span>Operação não tem plano de contingência para perda de headcount']},
+      {type:'cr', icon:'🔴', title:'Alerta 4 — CPC despencou: 53,5% → 26,3% (Abr)',
+       sub:'Ligação Muda/Caixa Postal explodiu de 26% → 47% — base saturada',
+       fact:'3 em cada 4 ligações não chegam ao cliente (THD Operadora 73,7%). Das que passam, <span class="neg">47%</span> caem em caixa postal. No daily Fev+Mar, Lig. Muda/Caixa Postal já representava 24,8% das tabulações — a tendência de saturação estava em curso.',
+       p5:['Por que o CPC despencou?<span class="arr">→</span>47% das ligações que chegam caem em caixa postal — sem contato real',
+           'Por que 47% de caixa postal?<span class="arr">→</span>Base saturada — mesmos clientes discados por 15 dias consecutivos',
+           'Por que mesmos clientes?<span class="arr">→</span>Base alocada 1–14 dias de atraso sem critério de exclusão',
+           'Por que uma só campanha?<span class="arr">→</span>Inadimplência Odres alta — atuando dentro dos ofensores Odres',
+           'Por que inadimplência alta?<span class="arr">→</span>CPFs com 3+ ciclos de inadimplência permanecem na fila ativa sem segmentação']},
+      {type:'wn', icon:'🟡', title:'Alerta 5 — % Pausa e Tempo Trabalhado críticos',
+       sub:'Pausa 40% (Red) e TP Trabalhado 49% em Março — ambos abaixo do benchmark',
+       fact:'Ociosidade em 41% — operadores esperando ligação que não chega. Com 71,8% de bloqueio de operadora + crescente caixa postal, o discador entrega pouquíssimas oportunidades reais. Beatris Santos tem a maior pausa individual.',
+       p5:['Por que % Falado em 7%?<span class="arr">→</span>Ociosidade 41% — discador não entrega Alôs suficientes',
+           'Por que tão poucos Alôs?<span class="arr">→</span>71,8% bloqueado por operadora + base saturando',
+           'Por que pausa acima do Desired?<span class="arr">→</span>Sem controle em tempo real pelo supervisor',
+           'Por que sem controle?<span class="arr">→</span>Alerta de pausa individual não configurado',
+           'Por que sem alerta?<span class="arr">→</span>SLA de pausa individual não formalizado']},
+    ],
+    perf: {
+      head: ['Operador','CPC% Fev+Mar','Conv% Fev+Mar','Lig Fev+Mar','% Time','Status'],
+      rows: [
+        ['Adriano Correia','~27%','~30%','2.446','13,5%','<span class="badge br">🔴 CPC Crítico</span>'],
+        ['Larissa de Mello','~56%','~55%','992','5,5%','<span class="badge bg">✅ Top Performer</span>'],
+        ['Beatris Santos','~42%','~43%','2.375','13,1%','<span class="badge br">🔴 Red CPC + Pausa alta</span>'],
+        ['Simone Gama ✗','—','—','3.442','19,0%','<span class="badge br">Risco desligamento Abr</span>'],
+      ]
+    },
+    insights: [
+      {n:'7',t:'p',title:'Base saturada — tendência visível desde Fev+Mar',body:'No daily Fev+Mar, "Ligação Muda/Caixa Postal" já era <strong>24,8%</strong> das tabulações. Em Abril essa proporção dobrou para 47%. A saturação com mesmos clientes discados repetidamente já estava em curso.'},
+      {n:'8',t:'p',title:'Simone = 19% do volume — risco de concentração',body:'Simone Gama respondeu por <strong>3.442 ligações (19%)</strong> do total do time no período Fev+Mar. Uma única operadora representando quase 1/5 da operação é um risco de concentração crítico sem par de backup.'},
+      {n:'9',t:'p',title:'Larissa de Mello — referência de performance',body:'Única operadora com CPC acima do benchmark (~56%). Conversão de ~55%. É a <strong>única operadora em nível Green</strong> na Odres. Seu comportamento de abordagem deve ser mapeado e replicado para o time.'},
+      {n:'10',t:'p',title:'"Atende e Desliga" — problema de script',body:'Das tabulações Fev+Mar, <strong>38,3%</strong> terminaram em "Atende e Desliga". Independente de headcount ou base, esse indicador aponta para problema de abordagem inicial. Escuta de ligações urgente.'},
+      {n:'11',t:'b',title:'PDI Beatris Santos — dois problemas simultâneos',body:'CPC em queda (42%→32%) + maior pausa individual. PDI: escuta de 5 ligações até 30/04, alerta de pausa individual ativado, check-in diário em Maio. Meta: <strong>CPC ≥40% e pausa ≤34% até 09/05</strong>.'},
+      {n:'12',t:'b',title:'AMD pode reduzir custo sem perder oportunidades',body:'Com 47% de caixa postal em Abril, AMD (detecção automática) eliminaria ~47% do custo de telefonia sem perder oportunidades reais. Já listado como concluído — confirmar se está ativo e funcionando na Odres.'},
+    ],
+  },
+};
+
+// FUNIL DATA
+const FUNIL = {
+  fev_mar: {
+    cols_ume:   ['UME Fev','UME Mar','Δ'],
+    cols_odres: ['Odres Mar'],
+    rows: [
+      {lbl:'Mailing',    ume:['442.376','471.998','<span class="cup">+6,7%</span>'],   odres:['77.287']},
+      {lbl:'Tentativas', ume:['313.877','175.636','<span class="cdn">−44%</span>'],    odres:['15.463'], hlr:true},
+      {lbl:'Alô',        ume:['9.463','4.434 (2,5%)','<span class="cdn">−53%</span>'],odres:['439 (2,8%)'], hlr:true},
+      {lbl:'CPC',        ume:['3.913 (41,4%)','1.994 (45,0%)','<span class="cdn">−49%</span>'],odres:['235 (53,5%)'], hlr:true},
+      {lbl:'Conversão',  ume:['1.839 (47,0%)','759 (38,1%)','<span class="cdn">−9,3pp🔴</span>'],odres:['106 (45,1%)'], hly:true},
+      {lbl:'Pagamento',  ume:['1.197 · R$224k','554 · R$109k','<span class="cdn">−54% · −51% R$</span>'],odres:['99 · R$17k'], hlr:true},
+    ],
+    note_ume:   '<strong>⚠️ Atenção:</strong> A queda de Fevereiro para Março (−51% de receita, −54% de pagamentos) sinalizava deterioração grave — <strong>não foi alertada formalmente</strong>. Os desligamentos em Abril agravam uma tendência que já estava em curso.',
+    note_odres: '<strong>⚠️ Atenção:</strong> Odres em Março já operava com CPC abaixo do benchmark (53,5% vs 54% mín). A tabulação "Lig. Muda/Caixa Postal" em 24,8% indicava saturação de base em andamento.',
+  },
+  fev_mar_abr: {
+    cols_ume:   ['UME Fev (15 DU)','UME Mar (15 DU)','UME Abr (15 DU)'],
+    cols_odres: ['Odres Mar (15 DU)','Odres Abr (15 DU)','Δ'],
+    rows: [
+      {lbl:'Mailing',    ume:['442.376','471.998','509.401'],                                odres:['77.287','94.558','<span class="cup">+22%</span>']},
+      {lbl:'Tentativas', ume:['235.408','168.514','139.468'],                              odres:['—','—','—'], hlr:true},
+      {lbl:'Alô',        ume:['7.097 (41,4%)','3.989 (43,1%)','3.412 (39,4%)'],           odres:['—','—','—'], hlr:true},
+      {lbl:'CPC',        ume:['2.935 (41,4%)','1.720 (43,1%)','1.343 (39,4%)'],           odres:['—','—','—'], hlr:true},
+      {lbl:'Conversão',  ume:['1.379 (47,0%)','649 (37,7%)','512 (38,1%)'],               odres:['—','—','—'], hly:true},
+      {lbl:'Pagamento',  ume:['898 · R$168k','378 · R$74k <span class="cdn">−55,7%</span>','215 · R$39k <span class="cdn">−47,0%</span>'],odres:['—','—','—'], hlr:true},
+    ],
+    note_ume:   '<strong>Comparativo equiparado (15 DU · prorated):</strong> Fev→Mar: tentativas −28%, Alôs −44%, receita −56%. Mar→Abr: tentativas −17%, receita −47% — impacto do headcount reduzido (3 de 6 operadoras). Taxas de CPC estáveis (~40%) indicam que a queda é de <strong>volume</strong>, não de qualidade.',
+    note_odres: '<strong>Comparativo equiparado (15 DU):</strong> A Odres em Abril sofreu colapso de CPC (53,5%→26,3%) por saturação de base. A conversão subiu — quem passou pelo filtro converte melhor — mas o volume total despencou.',
+  },
+};
+
+// CHECKLIST
+const CHECKLIST = [
+  {section:'UME — Headcount e Volume', items:[
+    {id:'cl01', text:'Monitorar horas logadas semanalmente — alerta ao supervisor se cair abaixo do mínimo · Monitorar na TTIP com Adriano', resp:'Adriano', prazo:'Toda Seg', tag:'m'},
+    {id:'cl02', text:'Acompanhar reintegração de Raquel a partir de 20/04 com monitoramento diário [Solicitar report à Rayara]', resp:'Rayara', prazo:'Diário 20/04+', tag:'m'},
+    {id:'cl03', text:'Escuta de ligações Kayke Araujo e Pamela Isabelle (Red CPC há 2 meses) — feedback individual, meta CPC ≥54% em 2 semanas', resp:'Supervisor UME', prazo:'02/05', tag:'u'},
+    {id:'cl04', text:'Reconfigurar discador para aumentar intensidade quando equipe estiver abaixo do quadro completo', resp:'Gustavo', prazo:'Imediato', tag:'u'},
+    {id:'cl05', text:'Iniciar recrutamento preventivo — não depender de equipe mínima', resp:'RH / Gestão', prazo:'Imediato', tag:'u'},
+  ]},
+  {section:'Odres — Qualidade de Contato', items:[
+    {id:'cl06', text:'Analisar histórico por DDD/horário e ajustar janela de discagem para horários de maior receptividade', resp:'Gustavo', prazo:'30/04', tag:'u'},
+    {id:'cl07', text:'Criar regra na base: 2x Lig. Muda no dia → sai da fila (volta amanhã) · 5x na semana → bloquear telefone', resp:'Gustavo', prazo:'30/04', tag:'u'},
+    {id:'cl08', text:'Randomização de Discagem ↔ Pontal', resp:'Gustavo', prazo:'02/05', tag:'u'},
+    {id:'cl09', text:'Configurar AMD (detecção automática de caixa postal) para encerrar ligação sem desperdiçar tempo do operador', resp:'Gustavo', prazo:'30/04', tag:'u'},
+    {id:'cl10', text:'Mapear CPFs com 3+ ciclos de inadimplência — criar fila separada com abordagem diferenciada', resp:'Gustavo / Adriano', prazo:'05/05', tag:'m'},
+    {id:'cl11', text:'Meta: reduzir Ligação Muda/Caixa Postal de 47% para abaixo de 30% em 2 semanas', resp:'Gustavo', prazo:'15/05', tag:'u'},
+  ]},
+  {section:'Ambos — Monitoramento Diário', items:[
+    {id:'cl12', text:'Monitorar CPC diariamente — alerta ao supervisor se cair abaixo de 54%', resp:'Supervisor UME + Odres', prazo:'28/04', tag:'u'},
+    {id:'cl13', text:'Formalizar SLA de pausa máxima: ≤34% por operador com alerta em tempo real ao passar de 35%', resp:'Gestão', prazo:'29/04', tag:'u'},
+    {id:'cl14', text:'PDI Beatris Santos (Odres): escuta 5 ligações até 30/04 · alerta pausa individual · check-in diário Maio · Meta: CPC ≥40% e pausa ≤34% até 09/05', resp:'Supervisor Odres', prazo:'30/04', tag:'u'},
+    {id:'cl15', text:'Feedback Rayara Danielle (UME): CPC Crítico (17%) mesmo com conversão excelente — investigar se é problema de lista/fila ou abordagem inicial', resp:'Supervisor UME', prazo:'30/04', tag:'m'},
+    {id:'cl16', text:'Escuta de 10 ligações tabuladas como "Atende e Desliga" por operador — investigar padrão de script', resp:'Supervisor Geral', prazo:'02/05', tag:'m'},
+    {id:'cl17', text:'Redundância de Telefonia', resp:'A definir', prazo:'A definir', tag:'m'},
+    {id:'cl18', text:'Investigar causa da queda de Spin entre Fev e Mar (0,71→0,52)', resp:'Gustavo', prazo:'05/05', tag:'m'},
+  ]},
+];
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+const pct  = v => v == null ? '—' : (v*100).toFixed(1)+'%';
+const fmtN = v => v.toLocaleString('pt-BR');
+const $ = id => document.getElementById(id);
+
+function semColor(metric, val) {
+  if (val == null) return 'gray';
+  if (metric === 'pausa') {
+    return val <= 0.31 ? 'green' : val <= 0.37 ? 'yellow' : 'red';
+  }
+  if (metric === 'falado') {
+    return val >= 0.23 ? 'green' : val >= 0.15 ? 'yellow' : 'red';
+  }
+  if (metric === 'trab') {
+    return val >= 0.69 ? 'green' : val >= 0.60 ? 'yellow' : 'red';
+  }
+  return 'gray';
+}
+function hmClass(metric, val) {
+  const c = semColor(metric, val);
+  return c === 'green' ? 'hg' : c === 'yellow' ? 'hy' : c === 'red' ? 'hr' : 'hgr';
+}
+function avg(arr, key) {
+  const v = arr.filter(d => d[key] != null).map(d => d[key]);
+  return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null;
+}
+
+// ─────────────────────────────────────────────
+// RENDER FUNCTIONS
+// ─────────────────────────────────────────────
+function renderExec() {
+  const c = CONTENT[op].exec[period];
+  $('exec-box').innerHTML = `<h3>Resumo Executivo</h3><p>${c}</p>`;
+}
+
+function renderSem() {
+  const cards = CONTENT[op].sem[period];
+  $('sem-grid').innerHTML = cards.map(c => `
+    <div class="sem-card ${c.status}">
+      <div class="sem-lbl">${c.lbl}</div>
+      <div class="sem-val">${c.val}</div>
+      <div class="sem-row">
+        <span class="sem-delta ${c.dclass}">${c.delta}</span>
+        <span class="badge ${c.status==='green'?'bg':c.status==='yellow'?'by':c.status==='red'?'br':'bgr'}">${c.status==='green'?'🟢 Green':c.status==='yellow'?'🟡 Yellow':c.status==='red'?'🔴 Red':'—'}</span>
+      </div>
+      <div class="sem-bench">${c.bench}</div>
+    </div>`).join('');
+}
+
+function renderBM() {
+  const bm = CONTENT[op].bm[period];
+  const is3 = period === 'fev_mar_abr';
+  const opName = op === 'ume' ? 'UME' : 'Odres';
+  $('bm-col1').textContent = is3 ? `${opName} Fev (eq.)` : `${opName} Mar`;
+  $('bm-col2').textContent = is3 ? `${opName} Mar (eq.)` : '';
+  $('bm-col3').textContent = is3 ? `${opName} Abr` : '';
+  $('bm-body').innerHTML = bm.map(r => `<tr>
+    <td class="lbl">${r.m}</td>
+    <td>${r.g}</td><td>${r.d}</td><td>${r.y}</td><td>${r.r}</td>
+    <td class="${r.cl1||''}">${r.v1||'—'}</td>
+    ${is3?`<td class="${r.cl2||''}">${r.v2||'—'}</td><td class="${r.cl3||''}">${r.v3||'—'}</td>`:''}
+  </tr>`).join('');
+}
+
+function renderFunil() {
+  const f = FUNIL[period];
+  const opName = op === 'ume' ? 'ume' : 'odres';
+  const cols = opName === 'ume' ? f.cols_ume : f.cols_odres;
+  const note = opName === 'ume' ? f.note_ume : f.note_odres;
+  const title = period === 'fev_mar' ? 'Funil Consolidado — Meses Fechados' : `Funil Consolidado — Mesmo DU (${D.n_eq} dias úteis)`;
+  $('funil-title').textContent = title;
+  $('funil-head').innerHTML = `<tr><th>Etapa</th>${cols.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+  $('funil-body').innerHTML = f.rows.map(r => {
+    const vals = opName === 'ume' ? r.ume : r.odres;
+    const cls = r.hlr ? 'hl-r' : r.hly ? 'hl-y' : '';
+    return `<tr class="${cls}"><td class="lbl">${r.lbl}</td>${vals.map(v=>`<td>${v}</td>`).join('')}</tr>`;
+  }).join('');
+  $('funil-note').innerHTML = note;
+}
+
+function renderHeatmap() {
+  let groups;
+  if (period === 'fev_mar') {
+    groups = [
+      {label:`Fevereiro (${D.ts_fev.du} DU)`,    days: D.fev_days},
+      {label:`Março (${D.ts_mar.du} DU)`,         days: D.mar_days},
+    ];
+  } else {
+    groups = [
+      {label:`Fev (${D.n_eq} DU eq.)`,  days: D.fev_eq},
+      {label:`Mar (${D.n_eq} DU eq.)`,  days: D.mar_eq},
+      {label:`Abr (${D.ts_abr.du} DU)`, days: D.abr_days},
+    ];
+  }
+
+  // Summary cards
+  $('hm-sum').innerHTML = groups.map(g => {
+    const t = avg(g.days,'trab'), p = avg(g.days,'pausa'), f = avg(g.days,'falado');
+    const lig = g.days.reduce((a,d)=>a+d.lig,0);
+    const pViol = g.days.filter(d=>d.pausa!=null&&d.pausa>0.34).length;
+    return `<div class="hms">
+      <div class="hms-lbl">${g.label}</div>
+      <div class="hms-val">${fmtN(lig)}</div>
+      <div class="hms-sub">ligações totais</div>
+      <div class="hms-bars">
+        <div class="hms-bar ${hmClass('trab',t)}">Trab: ${pct(t)}</div>
+        <div class="hms-bar ${hmClass('pausa',p)}">Pausa: ${pct(p)} (${pViol}/${g.days.filter(d=>d.pausa!=null).length} dias &gt;34%)</div>
+        <div class="hms-bar ${hmClass('falado',f)}">Falado: ${pct(f)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Table
+  const maxR = Math.max(...groups.map(g=>g.days.length));
+  const thCols = groups.map(g=>`<th colspan="3" style="text-align:center;background:var(--bg4);border:1px solid var(--border)">${g.label}</th>`).join('');
+  const thSub  = groups.map(()=>`<th>Trab%</th><th>Pausa%</th><th>Falado%</th>`).join('');
+  $('hmt-head').innerHTML = `<tr><th>DU</th>${thCols}</tr><tr><th></th>${thSub}</tr>`;
+
+  let rows = '';
+  for (let i=0;i<maxR;i++) {
+    let cells = `<td class="lbl">DU ${String(i+1).padStart(2,'0')}</td>`;
+    groups.forEach(g => {
+      const d = g.days[i];
+      if (!d) { cells += `<td class="hgr">—</td><td class="hgr">—</td><td class="hgr">—</td>`; return; }
+      cells += `
+        <td class="${hmClass('trab',d.trab)}" title="${d.data} ${d.dia}">${pct(d.trab)}</td>
+        <td class="${hmClass('pausa',d.pausa)}" title="Op:${d.op} · Lig:${fmtN(d.lig)}">${pct(d.pausa)}</td>
+        <td class="${hmClass('falado',d.falado)}">${pct(d.falado)}</td>`;
+    });
+    rows += `<tr>${cells}</tr>`;
+  }
+  $('hmt-body').innerHTML = rows;
+
+  // Note
+  let noteHTML = '<strong>Leitura por grupo:</strong> ';
+  groups.forEach(g => {
+    const p = avg(g.days,'pausa'), f = avg(g.days,'falado');
+    const pViol = g.days.filter(d=>d.pausa!=null&&d.pausa>0.34).length;
+    const pDen  = g.days.filter(d=>d.pausa!=null).length;
+    const pc = p>0.37?'var(--red)':p>0.34?'var(--yellow)':'var(--green)';
+    const fc = f<0.15?'var(--red)':f<0.19?'var(--yellow)':'var(--green)';
+    noteHTML += `<strong>${g.label}</strong>: pausa média <span style="color:${pc}">${pct(p)}</span> (${pViol}/${pDen} dias acima de 34%) · falado médio <span style="color:${fc}">${pct(f)}</span>. &nbsp;`;
+  });
+  $('hm-note').innerHTML = noteHTML;
+}
+
+function renderAlerts() {
+  const alerts = CONTENT[op].alerts;
+  $('alert-title').textContent = `Alertas — ${op==='ume'?'UME':'Odres'}`;
+  $('alerts-wrap').innerHTML = alerts.map(a => `
+    <div class="alert ${a.type}">
+      <div class="al-hd">
+        <div class="al-icon">${a.icon}</div>
+        <div>
+          <div class="al-title">${a.title}</div>
+          <div class="al-sub">${a.sub}</div>
         </div>
       </div>
+      <div class="fact">${a.fact}</div>
+      <div class="p5t">5 Porquês</div>
+      <ul class="p5">${a.p5.map(p=>`<li>${p}</li>`).join('')}</ul>
+    </div>`).join('');
+}
+
+function renderPerf() {
+  const p = CONTENT[op].perf;
+  $('perf-head').innerHTML = `<tr>${p.head.map(h=>`<th>${h}</th>`).join('')}</tr>`;
+  $('perf-body').innerHTML = p.rows.map(r => `<tr>${r.map((c,i)=>`<td ${i===0?'class="lbl"':''}>${c}</td>`).join('')}</tr>`).join('');
+}
+
+function renderInsights() {
+  const ins = CONTENT[op].insights;
+  $('insights-wrap').innerHTML = ins.map(i => `
+    <div class="ins">
+      <div class="ins-hd">
+        <div class="ins-num ${i.t}">${i.n}</div>
+        <div class="ins-title">${i.title}</div>
+      </div>
+      <div class="ins-body">${i.body}</div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// CHECKLIST
+// ─────────────────────────────────────────────
+let clState = {}; // {id: {checked, comment}}
+
+async function loadClState() {
+  try {
+    const r = await window.storage.get('checklist_state', true);
+    if (r && r.value) clState = JSON.parse(r.value);
+  } catch(e) { clState = {}; }
+}
+
+async function saveClState() {
+  try {
+    await window.storage.set('checklist_state', JSON.stringify(clState), true);
+  } catch(e) {}
+}
+
+function renderChecklist() {
+  const wrap = $('checklist-wrap');
+  wrap.innerHTML = '';
+  CHECKLIST.forEach(sec => {
+    const secDiv = document.createElement('div');
+    secDiv.className = 'cl-section';
+    secDiv.innerHTML = `<div class="sub-title">${sec.section}</div>`;
+    sec.items.forEach(item => {
+      const state = clState[item.id] || {checked:false, comment:''};
+      const div = document.createElement('div');
+      div.className = 'cl-item' + (state.checked?' done':'');
+      div.id = 'cl-wrap-'+item.id;
+
+      const tagMap = {u:'<span class="cl-tag u">Alta</span>', m:'<span class="cl-tag m">Média</span>', ok:'<span class="cl-tag ok">Baixa</span>'};
+      const hasComment = state.comment && state.comment.trim().length > 0;
+
+      div.innerHTML = `
+        <div class="cl-cb${state.checked?' checked':''}" id="cb-${item.id}" onclick="toggleCheck('${item.id}')"></div>
+        <div class="cl-text">
+          ${item.text}
+          <span style="color:var(--text3);font-size:11px;margin-left:8px">· ${item.resp} · ${item.prazo}</span>
+          ${tagMap[item.tag]||''}
+        </div>
+        <div class="cl-comment-wrap">
+          <div class="cl-comment-icon${hasComment?' has-comment':''}" id="icon-${item.id}" 
+               title="${hasComment?state.comment:''}"
+               onclick="togglePopover('${item.id}')">💬</div>
+          <div class="cl-popover" id="pop-${item.id}">
+            <div class="cl-popover-lbl">O que foi feito?</div>
+            ${hasComment && !state._editing
+              ? `<div class="cl-popover-text" id="ptxt-${item.id}">${state.comment}</div>
+                 <div class="cl-popover-actions">
+                   <button class="cl-cancel-btn" onclick="editComment('${item.id}')">✏️ Editar</button>
+                   <button class="cl-cancel-btn" onclick="closePopover('${item.id}')">Fechar</button>
+                 </div>`
+              : `<textarea class="cl-popover-input" id="pinput-${item.id}" placeholder="Descreva o que foi feito...">${state.comment||''}</textarea>
+                 <div class="cl-popover-actions">
+                   <button class="cl-cancel-btn" onclick="closePopover('${item.id}')">Cancelar</button>
+                   <button class="cl-save-btn" onclick="saveComment('${item.id}')">Salvar</button>
+                 </div>`
+            }
+          </div>
+        </div>`;
+      secDiv.appendChild(div);
+    });
+    wrap.appendChild(secDiv);
+  });
+
+  // Close popover on outside click
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.cl-comment-wrap')) {
+      document.querySelectorAll('.cl-popover.open').forEach(p => p.classList.remove('open'));
+    }
+  }, {capture:false});
+}
+
+async function toggleCheck(id) {
+  if (!clState[id]) clState[id] = {checked:false,comment:''};
+  clState[id].checked = !clState[id].checked;
+  await saveClState();
+
+  const wrap = $('cl-wrap-'+id);
+  const cb   = $('cb-'+id);
+  const icon = $('icon-'+id);
+
+  if (clState[id].checked) {
+    wrap.classList.add('done');
+    cb.classList.add('checked');
+    // auto-open comment popover
+    icon.classList.add('has-comment');
+    icon.style.display='flex';
+    openPopoverForEdit(id);
+  } else {
+    wrap.classList.remove('done');
+    cb.classList.remove('checked');
+    if (!clState[id].comment) icon.style.display='none';
+  }
+}
+
+function openPopoverForEdit(id) {
+  closeAllPopovers();
+  const pop = $('pop-'+id);
+  const state = clState[id]||{};
+  pop.innerHTML = `
+    <div class="cl-popover-lbl">O que foi feito?</div>
+    <textarea class="cl-popover-input" id="pinput-${id}" placeholder="Descreva o que foi feito...">${state.comment||''}</textarea>
+    <div class="cl-popover-actions">
+      <button class="cl-cancel-btn" onclick="closePopover('${id}')">Cancelar</button>
+      <button class="cl-save-btn" onclick="saveComment('${id}')">Salvar</button>
+    </div>`;
+  pop.classList.add('open');
+  setTimeout(()=>{ const t=$('pinput-'+id); if(t)t.focus(); },50);
+}
+
+function togglePopover(id) {
+  const pop = $('pop-'+id);
+  const isOpen = pop.classList.contains('open');
+  closeAllPopovers();
+  if (!isOpen) {
+    const state = clState[id]||{};
+    const hasComment = state.comment && state.comment.trim().length>0;
+    if (hasComment) {
+      pop.innerHTML = `
+        <div class="cl-popover-lbl">O que foi feito?</div>
+        <div class="cl-popover-text">${state.comment}</div>
+        <div class="cl-popover-actions">
+          <button class="cl-cancel-btn" onclick="editComment('${id}')">✏️ Editar</button>
+          <button class="cl-cancel-btn" onclick="closePopover('${id}')">Fechar</button>
+        </div>`;
+    } else {
+      pop.innerHTML = `
+        <div class="cl-popover-lbl">O que foi feito?</div>
+        <textarea class="cl-popover-input" id="pinput-${id}" placeholder="Descreva o que foi feito..."></textarea>
+        <div class="cl-popover-actions">
+          <button class="cl-cancel-btn" onclick="closePopover('${id}')">Cancelar</button>
+          <button class="cl-save-btn" onclick="saveComment('${id}')">Salvar</button>
+        </div>`;
+    }
+    pop.classList.add('open');
+    setTimeout(()=>{ const t=$('pinput-'+id); if(t)t.focus(); },50);
+  }
+}
+
+function editComment(id) {
+  const state = clState[id]||{};
+  const pop = $('pop-'+id);
+  pop.innerHTML = `
+    <div class="cl-popover-lbl">O que foi feito?</div>
+    <textarea class="cl-popover-input" id="pinput-${id}">${state.comment||''}</textarea>
+    <div class="cl-popover-actions">
+      <button class="cl-cancel-btn" onclick="closePopover('${id}')">Cancelar</button>
+      <button class="cl-save-btn" onclick="saveComment('${id}')">Salvar</button>
+    </div>`;
+  setTimeout(()=>{ const t=$('pinput-${id}'); if(t)t.focus(); },50);
+}
+
+async function saveComment(id) {
+  const input = $('pinput-'+id);
+  if (!input) return;
+  const val = input.value.trim();
+  if (!clState[id]) clState[id] = {checked:false, comment:''};
+  clState[id].comment = val;
+  await saveClState();
+  const icon = $('icon-'+id);
+  if (val) {
+    icon.classList.add('has-comment');
+    icon.title = val;
+    icon.style.display='flex';
+  } else {
+    icon.classList.remove('has-comment');
+  }
+  closePopover(id);
+  // Re-render popover to read-only mode
+  const pop = $('pop-'+id);
+  pop.innerHTML = val ? `
+    <div class="cl-popover-lbl">O que foi feito?</div>
+    <div class="cl-popover-text">${val}</div>
+    <div class="cl-popover-actions">
+      <button class="cl-cancel-btn" onclick="editComment('${id}')">✏️ Editar</button>
+      <button class="cl-cancel-btn" onclick="closePopover('${id}')">Fechar</button>
+    </div>` : '';
+}
+
+function closePopover(id) { const p=$('pop-'+id); if(p) p.classList.remove('open'); }
+function closeAllPopovers() { document.querySelectorAll('.cl-popover.open').forEach(p=>p.classList.remove('open')); }
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function setPeriod(p) {
+  period = p;
+  document.querySelectorAll('[id^="btn-fev"]').forEach(b=>b.classList.remove('active'));
+  $('btn-'+p.replaceAll('_','-')).classList.add('active');
+  const notes = {
+    fev_mar:     'Fev: 20 DU · Mar: 22 DU — meses fechados completos',
+    fev_mar_abr: `Fev: ${D.n_eq} DU · Mar: ${D.n_eq} DU · Abr: ${D.n_eq} DU — mesmo período equiparado`,
+  };
+  $('period-note').textContent = notes[p];
+  renderAll();
+}
+
+function setOp(o) {
+  op = o;
+  $('btn-ume').classList.toggle('active', o==='ume');
+  $('btn-odres').classList.toggle('active', o==='odres');
+  renderAll();
+}
+
+function renderAll() {
+  renderExec();
+  renderSem();
+  renderBM();
+  renderFunil();
+  renderHeatmap();
+  renderAlerts();
+  renderPerf();
+  renderInsights();
+  const cl = $('sec-checklist');
+  if (cl) cl.style.display = period === 'fev_mar_abr' ? 'none' : 'block';
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+// Init — called by switchApp
+  async function _discInit() {
+    await loadClState();
+    renderAll();
+    renderChecklist();
+  }
+  window._discInit = _discInit;
+  _discInit(); // also run on load so content is ready
+
+  // ── Expose to window for HTML onclick handlers ──
+  window.setPeriod      = setPeriod;
+  window.setOp          = setOp;
+  window.toggleCheck    = toggleCheck;
+  window.togglePopover  = togglePopover;
+  window.saveComment    = saveComment;
+  window.closePopover   = closePopover;
+  window.editComment    = editComment;
+
+
+
+})();
+</script>
+
+
+<script>
+(function() {
+
+const URA_DATA = {"fpd15": {"totais": {"tentativas": 66873, "atendidas": 3538, "cpc": 819, "conversao": 292, "pagamentos": 31, "receita": 5771.25, "custo_tel": 1256.19}, "daily": {"dates": ["02/03", "03/03", "04/03", "05/03", "06/03", "09/03", "10/03", "11/03", "12/03", "13/03", "16/03", "17/03", "18/03", "19/03", "20/03", "23/03", "24/03", "25/03", "26/03", "27/03", "30/03", "31/03"], "tent": [2007, 1626, 1489, 1315, 1292, 1726, 1370, 1280, 3616, 4619, 5080, 4497, 4668, 5013, 4715, 5550, 2963, 2896, 2883, 2749, 3022, 2497], "atend": [126, 78, 64, 59, 55, 99, 64, 67, 230, 180, 347, 253, 216, 234, 271, 382, 152, 130, 140, 105, 165, 121], "cpc": [37, 19, 17, 16, 7, 24, 10, 17, 62, 41, 81, 59, 40, 35, 71, 133, 33, 20, 24, 14, 36, 23], "conv": [19, 9, 6, 3, 2, 10, 2, 4, 24, 16, 28, 18, 15, 12, 32, 46, 6, 5, 6, 6, 15, 8], "p_atend": [0.0628, 0.048, 0.043, 0.0449, 0.0426, 0.0574, 0.0467, 0.0523, 0.0636, 0.039, 0.0683, 0.0563, 0.0463, 0.0467, 0.0575, 0.0688, 0.0513, 0.0449, 0.0486, 0.0382, 0.0546, 0.0485], "p_cpc": [0.2937, 0.2436, 0.2656, 0.2712, 0.1273, 0.2424, 0.1562, 0.2537, 0.2696, 0.2278, 0.2334, 0.2332, 0.1852, 0.1496, 0.262, 0.3482, 0.2171, 0.1538, 0.1714, 0.1333, 0.2182, 0.1901], "p_conv": [0.5135, 0.4737, 0.3529, 0.1875, 0.2857, 0.4167, 0.2, 0.2353, 0.3871, 0.3902, 0.3457, 0.3051, 0.375, 0.3429, 0.4507, 0.3459, 0.1818, 0.25, 0.25, 0.4286, 0.4167, 0.3478]}, "status": {"Atendida": {"n": 3491, "pct": 0.0522}, "Congestionamento": {"n": 1011, "pct": 0.0151}, "Maquina": {"n": 51491, "pct": 0.77}, "Maquina apos Atendimento": {"n": 92, "pct": 0.0014}, "Numero invalido": {"n": 1268, "pct": 0.019}, "Outros": {"n": 9, "pct": 0.0001}, "Rejeitado": {"n": 146, "pct": 0.0022}, "Restricao": {"n": 51, "pct": 0.0008}, "Silencio": {"n": 9314, "pct": 0.1393}}, "grupos": [{"label": "Grupo 1 – Abertura / Identificação", "n": 1885, "pct": 0.9449}, {"label": "Pergunta se e a pessoa", "n": 1875, "pct": 0.9398}, {"label": "Pergunta novamente se e a pessoa.", "n": 10, "pct": 0.005}, {"label": "Grupo 2 – Validação / Pós-atendimento Inicial", "n": 19, "pct": 0.0095}, {"label": "Grupo 3 – Dúvidas / Encaminhamentos", "n": 41, "pct": 0.0206}, {"label": "Grupo 4 – Finalização / Encerramento", "n": 50, "pct": 0.0251}]}, "loc": {"totais": {"tentativas": 69293, "atendidas": 3362, "cpc": 1471, "conversao": 0, "pagamentos": 14, "receita": 2705.47, "custo_tel": 1546.13}, "daily": {"dates": ["03/03", "10/03", "11/03", "12/03", "17/03", "18/03", "19/03", "23/03", "26/03", "30/03"], "tent": [1126, 14805, 11319, 6640, 16105, 5423, 4, 4837, 1803, 7231], "atend": [61, 741, 543, 296, 786, 164, 0, 313, 87, 371], "cpc": [22, 365, 236, 92, 324, 54, 0, 162, 34, 182], "conv": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "p_atend": [0.0542, 0.0501, 0.048, 0.0446, 0.0488, 0.0302, 0.0647, 0.0483, 0.0513], "p_cpc": [0.3607, 0.4926, 0.4346, 0.3108, 0.4122, 0.3293, 0.5176, 0.3908, 0.4906], "p_conv": []}, "status": {"Atendida": {"n": 5937, "pct": 0.0857}, "Congestionamento": {"n": 107, "pct": 0.0015}, "Maquina": {"n": 52153, "pct": 0.7526}, "Maquina apos Atendimento": {"n": 175, "pct": 0.0025}, "Numero invalido": {"n": 2880, "pct": 0.0416}, "Outros": {"n": 3, "pct": 0.0}, "Rejeitado": {"n": 16, "pct": 0.0002}, "Restricao": {"n": 231, "pct": 0.0033}, "Silencio": {"n": 7791, "pct": 0.1124}}, "grupos": [{"label": "Grupo 1 – Abertura / Identificação", "n": 1891, "pct": 0.5625}, {"label": "Pergunta se e a pessoa", "n": 1891, "pct": 0.5625}, {"label": "Grupo 4 – Finalização / Encerramento", "n": 1471, "pct": 0.4375}]}, "onb": {"totais": {"tentativas": 45057, "atendidas": 910, "cpc": 768, "conversao": 37, "pagamentos": 37, "receita": 6608.32, "custo_tel": 352.0}, "daily": {"dates": ["02/03", "03/03", "04/03", "05/03", "06/03", "09/03", "10/03", "11/03", "12/03", "13/03", "16/03", "17/03", "18/03", "19/03", "20/03", "23/03", "25/03", "26/03", "27/03", "30/03", "31/03"], "tent": [2100, 2086, 1948, 1977, 2522, 2368, 2332, 2111, 1869, 2223, 1775, 1886, 1817, 3731, 2153, 2022, 2013, 1829, 2284, 2036, 1975], "atend": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 106, 126, 123, 119, 58, 131, 131, 116], "cpc": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 94, 103, 101, 98, 49, 113, 113, 97], "conv": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "p_atend": [0.0284, 0.0585, 0.0608, 0.0591, 0.0317, 0.0574, 0.0643, 0.0587], "p_cpc": [0.8868, 0.8175, 0.8211, 0.8235, 0.8448, 0.8626, 0.8626, 0.8362], "p_conv": []}, "status": {"Atendida": {"n": 2359, "pct": 0.0524}, "Congestionamento": {"n": 86, "pct": 0.0019}, "Maquina": {"n": 10439, "pct": 0.2317}, "Maquina apos Atendimento": {"n": 88, "pct": 0.002}, "Numero invalido": {"n": 29770, "pct": 0.6607}, "Outros": {"n": 26, "pct": 0.0006}, "Rejeitado": {"n": 2, "pct": 0.0}, "Silencio": {"n": 2287, "pct": 0.0508}, "Total Geral": {"n": 45057, "pct": 1.0}}, "grupos": [{"label": "Grupo 1 – Abertura / Identificação", "n": 924, "pct": 0.9914}, {"label": "Pergunta se e a pessoa", "n": 571, "pct": 0.6127}, {"label": "Pergunta novamente se e a pessoa.", "n": 353, "pct": 0.3788}, {"label": "Grupo 2 – Validação / Pós-atendimento Inicial", "n": 8, "pct": 0.0086}]}, "fpd30": {"totais": {"tentativas": 630157, "atendidas": 28019, "cpc": 6190, "conversao": 1916, "pagamentos": 492, "receita": 59149.32, "custo_tel": 12464.04}, "daily": {"dates": ["02/03", "03/03", "04/03", "05/03", "06/03", "09/03", "10/03", "11/03", "12/03", "13/03", "16/03", "17/03", "18/03", "19/03", "20/03", "23/03", "24/03", "25/03", "26/03", "27/03", "30/03", "31/03"], "tent": [32844, 31749, 31494, 30906, 29983, 32161, 27988, 31124, 31116, 30360, 26557, 31323, 27896, 30129, 25743, 24652, 26995, 16621, 30927, 27119, 27196, 25274], "atend": [2029, 1574, 1514, 1423, 1255, 1641, 1322, 1357, 1235, 742, 1232, 1541, 1051, 1083, 985, 1251, 1045, 720, 1333, 1140, 1425, 1121], "cpc": [561, 382, 331, 325, 269, 415, 298, 282, 246, 115, 264, 336, 195, 224, 202, 346, 211, 148, 226, 221, 348, 245], "conv": [202, 115, 108, 123, 87, 128, 87, 87, 69, 37, 82, 79, 62, 66, 53, 103, 45, 51, 52, 60, 134, 86], "p_atend": [0.0618, 0.0496, 0.0481, 0.046, 0.0419, 0.051, 0.0472, 0.0436, 0.0397, 0.0244, 0.0464, 0.0492, 0.0377, 0.0359, 0.0383, 0.0507, 0.0387, 0.0433, 0.0431, 0.042, 0.0524, 0.0444], "p_cpc": [0.2765, 0.2427, 0.2186, 0.2284, 0.2143, 0.2529, 0.2254, 0.2078, 0.1992, 0.155, 0.2143, 0.218, 0.1855, 0.2068, 0.2051, 0.2766, 0.2019, 0.2056, 0.1695, 0.1939, 0.2442, 0.2186], "p_conv": [0.3601, 0.301, 0.3263, 0.3785, 0.3234, 0.3084, 0.2919, 0.3085, 0.2805, 0.3217, 0.3106, 0.2351, 0.3179, 0.2946, 0.2624, 0.2977, 0.2133, 0.3446, 0.2301, 0.2715, 0.3851, 0.351]}, "status": {"Atendida": {"n": 32081, "pct": 0.0509}, "Congestionamento": {"n": 7210, "pct": 0.0114}, "Maquina": {"n": 491685, "pct": 0.7803}, "Maquina apos Atendimento": {"n": 652, "pct": 0.001}, "Numero invalido": {"n": 12798, "pct": 0.0203}, "Outros": {"n": 68, "pct": 0.0001}, "Rejeitado": {"n": 950, "pct": 0.0015}, "Restricao": {"n": 2944, "pct": 0.0047}, "Silencio": {"n": 81769, "pct": 0.1298}}, "grupos": [{"label": "Grupo 1 – Abertura / Identificação", "n": 24864, "pct": 0.8874}, {"label": "Pergunta se e a pessoa", "n": 12112, "pct": 0.4323}, {"label": "Pergunta novamente se e a pessoa.", "n": 5979, "pct": 0.2134}, {"label": "Apresenta divida e pergunta se pode pagar hoje.", "n": 2988, "pct": 0.1066}, {"label": "Mensagem apos falar que vai pagar hoje.", "n": 1095, "pct": 0.0391}, {"label": "Mensagem apos falar que vai pagar DX.", "n": 821, "pct": 0.0293}, {"label": "Nao consegue falar com essa pessoa nesse telefone.", "n": 658, "pct": 0.0235}, {"label": "Mensagem max, finaliza.", "n": 1211, "pct": 0.0432}, {"label": "Grupo 2 – Validação / Pós-atendimento Inicial", "n": 1605, "pct": 0.0573}, {"label": "Grupo 3 – Dúvidas / Encaminhamentos", "n": 951, "pct": 0.0339}]}};
+
+const URA_META = {
+  fpd15: {
+    name: 'URA FPD15',
+    desc: 'First Payment Default · 0–15 dias de atraso · Odres',
+    color: '#3b82f6',
+    icon: '📞',
+    insights: [
+      { icon:'🎯', title:'CPC muito baixo — 23,1% das atendidas', body:'Apenas <strong>1 em cada 4</strong> clientes que atende é qualificado como CPC. A maioria das atendidas é bloqueada por ruído, demora ou desconfiança na abertura da URA. O script de identificação pode estar gerando hesitação.' },
+      { icon:'⚠️', title:'77% das ligações vão para máquina', body:'O THD de Máquina em <strong>77%</strong> indica saturação de base ou horários de discagem inadequados. Das ligações que chegam ao cliente real, ainda há 13,9% de silêncio — possível identificação de robô pelo cliente.' },
+      { icon:'💰', title:'ROI de 4,6x · Ticket médio R$ 186', body:'Para cada R$ 1 gasto em telefonia, a URA retornou <strong>R$ 4,60 em receita</strong>. Com 31 pagamentos em 22 dias úteis (média de 1,4/dia), há espaço significativo para crescimento via melhoria de conversão.' },
+      { icon:'🔍', title:'Conversão cai após CPC — 35,7%', body:'De 819 CPCs, apenas 292 converteram. A taxa de <strong>35,7%</strong> indica que o cliente chega ao ponto de negociação mas não fecha. Investigar objeções de pagamento e flexibilidade de prazo no script.' },
+      { icon:'📈', title:'Pico de produtividade na 2ª quinzena', body:'Os dias 16, 17, 19 e 23/03 concentram os maiores volumes de CPC e conversão. A base de clientes com 0–15 dias de atraso responde melhor após o meio do mês — possível alinhamento com datas de recebimento.' },
+      { icon:'🚨', title:'Taxa de atendimento de apenas 5,3%', body:'De 66.873 tentativas, apenas 3.538 geraram atendimento humano real. Isso representa <strong>1 atendimento a cada 19 tentativas</strong>. Limpeza de base e AMD podem reduzir custo sem perder oportunidades.' },
+    ]
+  },
+  loc: {
+    name: 'Localizador Odres',
+    desc: 'URA de Localização de Contato · Odres · Março 2026',
+    color: '#22c55e',
+    icon: '📍',
+    insights: [
+      { icon:'⚠️', title:'Conversão zero — URA não fecha negócio', body:'O Localizador registrou <strong>0 conversões</strong> em 1.471 CPCs. Isso é esperado para uma URA de localização — seu objetivo é qualificar contato, não converter. O KPI relevante aqui é o CPC/Atendida (43,8%), não conversão.' },
+      { icon:'🎯', title:'CPC de 43,8% — melhor entre as 4 URAs', body:'Quase <strong>1 em cada 2</strong> atendimentos gera um CPC qualificado. Isso indica que a base do Localizador é mais precisa — clientes que atendem são os certos. O problema está na taxa de atendimento geral (4,9%).' },
+      { icon:'📅', title:'Apenas 10 dias de operação em Março', body:'A URA rodou em apenas 10 dias (vs 22 dos FPDs). Possível intermitência operacional ou campanha pontual. Os dias 10–12/03 e 17/03 concentraram 74% de todo o volume — padrão de lotes em vez de fluxo contínuo.' },
+      { icon:'💸', title:'ROI de 1,7x — o menor do grupo', body:'Com R$ 2.705 de receita contra R$ 1.546 de custo de telefonia, o Localizador tem a menor eficiência financeira. Porém, como é uma URA de qualificação, o valor real está na base que ela gera para outras campanhas.' },
+      { icon:'🔍', title:'75% de máquina — base de celulares desatualizados', body:'3 em cada 4 ligações vão para correio de voz ou máquina. Para um Localizador, isso sugere que a base de telefones está desatualizada. Vale enriquecer com outras fontes antes de discar.' },
+      { icon:'🏆', title:'14 pagamentos gerados — impacto indireto', body:'Mesmo sem conversão direta, 14 boletos foram pagos. Isso indica que o Localizador recupera clientes por <strong>downstream</strong> — o cliente é localizado e depois converte em outro canal.' },
+    ]
+  },
+  onb: {
+    name: 'Onboarding Odres',
+    desc: 'URA de Onboarding · Primeiros Pagamentos · Odres',
+    color: '#a855f7',
+    icon: '🆕',
+    insights: [
+      { icon:'🏆', title:'ROI de 18,8x — melhor eficiência do grupo', body:'Para cada R$ 1 gasto em telefonia (R$ 352), a URA gerou <strong>R$ 6.608 em receita</strong>. Isso representa ROI de 18,8x — muito superior às URAs de cobrança. Onboarding tem custo baixo e alta precisão de base.' },
+      { icon:'✅', title:'CPC de 84,4% — excepcional', body:'Quando um cliente atende, há <strong>84,4% de chance</strong> de ser um CPC qualificado. A base de onboarding é recente e precisa — os telefones são válidos e os clientes estão ativos e engajados.' },
+      { icon:'⚠️', title:'URA só ativou nos últimos 7 dias do mês', body:'Os registros de CPC e conversão começam apenas em 19/03. Os primeiros 14 dias úteis (02–18/03) registraram <strong>zero CPCs e zero conversões</strong>. Isso indica que a URA foi ativada ou reconfigurada no meio do mês.' },
+      { icon:'🎯', title:'99% de número inválido nos primeiros dias', body:'Antes de 19/03, 99,9% das tentativas eram para "Número Inválido". A partir de 19/03, o padrão mudou para atendimentos reais. Possível troca de base ou ajuste de campanha no dia 19/03.' },
+      { icon:'💰', title:'Ticket médio de R$ 178 · 37 pagamentos', body:'Com 37 pagamentos e R$ 6.608 de receita, o ticket médio é R$ 178,6. Comparado ao FPD15 (R$ 186) e FPD30 (R$ 120), o Onboarding tem bom valor por cliente — faz sentido, já que são clientes ativos.' },
+      { icon:'📈', title:'Potencial enorme se rodasse o mês inteiro', body:'Com 7 dias de operação real e 37 pagamentos, projetando para 22 DU a receita seria de <strong>~R$ 20.700</strong>. O custo de telefonia proporcional seria ~R$ 1.100 — ROI mantido em ~19x. Vale antecipar a ativação no mês seguinte.' },
+    ]
+  },
+  fpd30: {
+    name: 'URA FPD30',
+    desc: 'First Payment Default · 30+ dias de atraso · Maior volume',
+    color: '#f59e0b',
+    icon: '📞',
+    insights: [
+      { icon:'💰', title:'R$ 59.149 — maior receita absoluta do grupo', body:'Com 492 pagamentos e R$ 59.149, o FPD30 representa <strong>79%</strong> de toda a receita das 4 URAs combinadas (R$ 74.334). É o principal motor de cobrança da operação Odres.' },
+      { icon:'📊', title:'Maior volume: 630k tentativas · 22 dias', body:'A URA realizou em média <strong>28.644 tentativas por dia</strong> — 9x mais que o FPD15. Isso exige custo de telefonia proporcional (R$ 12.464), mas o ROI de 4,7x ainda é sólido.' },
+      { icon:'🔍', title:'CPC de 22,1% — baixo para o volume discado', body:'Com base de 30+ dias, os clientes têm mais comportamento evasivo. 1 em cada 5 atendimentos é CPC. Comparando com FPD15 (23,1%), a diferença é pequena mas o impacto absoluto é maior dado o volume.' },
+      { icon:'⚠️', title:'Dia 13/03 — colapso de performance', body:'Em 13/03, o CPC caiu para 742 (vs média de 1.290/dia) e a conversão para 115 (vs média de 255/dia). O dia registrou o pior <strong>%CPC (15,5%)</strong> e <strong>%Conv (15,5%)</strong> de todo o mês. Investigar falha operacional.' },
+      { icon:'🎯', title:'Conversão de 31% — consistente ao longo do mês', body:'A taxa de conversão oscilou entre 16% e 36% por dia, com média de 31%. Os dias com mais alto CPC absoluto tendem a ter conversão maior também — escala funciona. Foco em aumentar CPC/atend.' },
+      { icon:'🚨', title:'78% de máquina — base muito envelhecida', body:'Com 30+ dias de atraso, a base tem muito mais telefones desatualizados. O índice de Máquina (78%) supera o FPD15 (77%). AMD configurado corretamente pode economizar R$ 9.700 só em ligações para máquina.' },
+    ]
+  },
+};
+
+let currentUra = 'fpd15';
+
+function switchUra(key) {
+  currentUra = key;
+  document.querySelectorAll('.ura-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('utab-' + key).classList.add('active');
+  renderUra(key);
+}
+
+function fmt(n) { return Number(n).toLocaleString('pt-BR'); }
+function fmtR(n) { return 'R$ ' + Number(n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function pct(a,b) { return b ? (a/b*100).toFixed(1)+'%' : '—'; }
+
+function renderUra(key) {
+  const d = URA_DATA[key];
+  const m = URA_META[key];
+  const t = d.totais;
+  const dl = d.daily;
+
+  const roi    = t.custo_tel > 0 ? (t.receita / t.custo_tel).toFixed(1) : '—';
+  const ticket = t.pagamentos > 0 ? (t.receita / t.pagamentos).toFixed(2) : '—';
+  const custoPag = t.pagamentos > 0 ? (t.custo_tel / t.pagamentos).toFixed(2) : '—';
+  const pAtend = t.tentativas > 0 ? (t.atendidas / t.tentativas * 100).toFixed(1) : '0';
+  const pCpc   = t.atendidas  > 0 ? (t.cpc / t.atendidas * 100).toFixed(1) : '0';
+  const pConv  = t.cpc > 0 ? (t.conversao / t.cpc * 100).toFixed(1) : '0';
+  const pPag   = t.conversao > 0 ? (t.pagamentos / t.conversao * 100).toFixed(1) : '0';
+
+  // Chart: CPC/day bars
+  const maxCpc = Math.max(...dl.cpc.filter(v => v > 0), 1);
+  const maxH = 80;
+  const bars = dl.dates.map((date, i) => {
+    const v = dl.cpc[i] || 0;
+    const h = Math.max(Math.round(v / maxCpc * maxH), 2);
+    const pctCpcDay = dl.p_cpc[i] ? (dl.p_cpc[i]*100).toFixed(1)+'%' : '';
+    return `<div class="ura-bar-col">
+      <div class="ura-bar-val">${v > 0 ? v : ''}</div>
+      <div class="ura-bar" style="height:${h}px;background:${m.color};opacity:${0.5 + v/maxCpc*0.5}" title="${date}: ${v} CPCs (${pctCpcDay})"></div>
+      <div class="ura-bar-lbl">${date.slice(0,5)}</div>
+    </div>`;
+  }).join('');
+
+  // Status colors
+  const statusColors = {
+    'Atendida': '#22c55e', 'Maquina': '#ef4444', 'Silencio': '#f59e0b',
+    'Numero invalido': '#64748b', 'Congestionamento': '#3b82f6',
+    'Rejeitado': '#8b5cf6', 'Maquina apos Atendimento': '#f97316',
+    'Restricao': '#ec4899', 'Outros': '#94a3b8',
+  };
+  const statusHTML = Object.entries(d.status).sort((a,b) => b[1].n - a[1].n).map(([label, {n, pct: p}]) => `
+    <div class="ura-status-item">
+      <div class="ura-status-dot" style="background:${statusColors[label] || '#94a3b8'}"></div>
+      <div class="ura-status-label">${label}</div>
+      <div class="ura-status-n">${fmt(n)}</div>
+      <div class="ura-status-pct">${(p*100).toFixed(1)}%</div>
+    </div>`).join('');
+
+  // Grupos
+  const maxGrupo = Math.max(...d.grupos.map(g => g.n), 1);
+  const gruposHTML = d.grupos.map(g => `
+    <div class="ura-group-item">
+      <div class="ura-group-head">
+        <span class="ura-group-name">${g.label}</span>
+        <span class="ura-group-val">${fmt(g.n)} · ${(g.pct*100).toFixed(1)}%</span>
+      </div>
+      <div class="ura-group-bar-bg">
+        <div class="ura-group-bar-fill" style="width:${(g.n/maxGrupo*100).toFixed(0)}%;background:${m.color}"></div>
+      </div>
+    </div>`).join('');
+
+  // Daily table
+  const dailyRows = dl.dates.map((date, i) => {
+    const tent  = dl.tent[i]  || 0;
+    const atend = dl.atend[i] || 0;
+    const cpc   = dl.cpc[i]   || 0;
+    const conv  = dl.conv[i]  || 0;
+    const pCpcD = dl.p_cpc[i] ? (dl.p_cpc[i]*100).toFixed(1) : '0';
+    const pCvD  = dl.p_conv[i]? (dl.p_conv[i]*100).toFixed(1): '0';
+    const cpcColor = parseFloat(pCpcD) >= 25 ? 'hi' : parseFloat(pCpcD) < 10 ? 'lo' : '';
+    return `<tr>
+      <td class="lbl">${date}</td>
+      <td>${tent > 0 ? fmt(tent) : '—'}</td>
+      <td>${fmt(atend)}</td>
+      <td class="${cpcColor}">${fmt(cpc)}</td>
+      <td class="${cpcColor}">${pCpcD}%</td>
+      <td>${fmt(conv)}</td>
+      <td>${pCvD}%</td>
+    </tr>`;
+  }).join('');
+
+  // Insights
+  const insightsHTML = m.insights.map(ins => `
+    <div class="ura-ins">
+      <div class="ura-ins-head">
+        <span class="ura-ins-icon">${ins.icon}</span>
+        <span class="ura-ins-title">${ins.title}</span>
+      </div>
+      <div class="ura-ins-body">${ins.body}</div>
+    </div>`).join('');
+
+  // Funnel
+  const funnelMax = t.tentativas || 1;
+  const funnelData = [
+    {label:'Tentativas', n: t.tentativas, color:'#475569', ref: funnelMax},
+    {label:'Atendidas',  n: t.atendidas,  color: m.color,  ref: funnelMax},
+    {label:'CPC',        n: t.cpc,        color:'#3b82f6', ref: funnelMax},
+    {label:'Conversão',  n: t.conversao,  color:'#22c55e', ref: funnelMax},
+    {label:'Pagamentos', n: t.pagamentos, color:'#f59e0b', ref: funnelMax},
+  ];
+  const funnelHTML = funnelData.map((row, i) => {
+    const pctPrev = i === 0 ? 100 : (row.n / (funnelData[i-1].n || 1) * 100).toFixed(1);
+    const barW = (row.n / funnelMax * 100).toFixed(1);
+    return `<div class="ura-funnel-row">
+      <div class="ura-funnel-label">${row.label}</div>
+      <div class="ura-funnel-bar-wrap">
+        <div class="ura-funnel-bar" style="width:${barW}%;background:${row.color}"></div>
+      </div>
+      <div class="ura-funnel-val">${fmt(row.n)}</div>
+      <div class="ura-funnel-pct">${i > 0 ? pctPrev + '%' : '100%'}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('ura-body').innerHTML = `
+    <div class="ura-title">${m.icon} ${m.name}</div>
+    <div class="ura-subtitle">${m.desc} · Março 2026 · ${dl.dates.length} dias úteis</div>
+
+    <!-- KPIs -->
+    <div class="ura-kpi-grid">
+      <div class="ura-kpi"><div class="ura-kpi-l">Tentativas</div><div class="ura-kpi-v white">${fmt(t.tentativas)}</div><div class="ura-kpi-s">${dl.dates.length} dias úteis</div></div>
+      <div class="ura-kpi"><div class="ura-kpi-l">Atendidas</div><div class="ura-kpi-v blue">${fmt(t.atendidas)}</div><div class="ura-kpi-s">${pAtend}% das tentativas</div></div>
+      <div class="ura-kpi"><div class="ura-kpi-l">CPC</div><div class="ura-kpi-v ${parseFloat(pCpc)>=25?'green':parseFloat(pCpc)<15?'red':'yellow'}">${fmt(t.cpc)}</div><div class="ura-kpi-s">${pCpc}% das atendidas</div></div>
+      <div class="ura-kpi"><div class="ura-kpi-l">Conversão</div><div class="ura-kpi-v ${parseFloat(pConv)>=40?'green':parseFloat(pConv)<20?'red':'yellow'}">${fmt(t.conversao)}</div><div class="ura-kpi-s">${pConv}% dos CPCs</div></div>
+      <div class="ura-kpi"><div class="ura-kpi-l">Pagamentos</div><div class="ura-kpi-v green">${fmt(t.pagamentos)}</div><div class="ura-kpi-s">${pPag}% das conversões</div></div>
+      <div class="ura-kpi"><div class="ura-kpi-l">Receita</div><div class="ura-kpi-v green" style="font-size:18px">${fmtR(t.receita)}</div><div class="ura-kpi-s">Ticket médio: R$ ${ticket}</div></div>
+      <div class="ura-kpi"><div class="ura-kpi-l">Custo Telefonia</div><div class="ura-kpi-v red" style="font-size:18px">${fmtR(t.custo_tel)}</div><div class="ura-kpi-s">R$ ${custoPag}/pagamento</div></div>
+      <div class="ura-kpi"><div class="ura-kpi-l">ROI Telefonia</div><div class="ura-kpi-v ${parseFloat(roi)>=5?'green':parseFloat(roi)<2?'red':'yellow'}">${roi}x</div><div class="ura-kpi-s">Receita / Custo Tel.</div></div>
     </div>
-    <div style="display:flex;gap:12px;margin-bottom:12px;font-size:12px;color:#888;">
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#93c5fd;display:inline-block;"></span>Fevereiro</span>
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#6ee7b7;display:inline-block;"></span>Março</span>
+
+    <!-- Funil -->
+    <div class="ura-sec">
+      <div class="ura-sec-title">Funil de Conversão</div>
+      <div class="ura-funnel">${funnelHTML}</div>
     </div>
-    ${teamTable('UME','#1a56db',umeOps)}
-    ${teamTable('ODRES','#0d7a55',odresOps)}
+
+    <!-- CPC Diário -->
+    <div class="ura-sec">
+      <div class="ura-sec-title">CPC por Dia Útil</div>
+      <div class="ura-chart"><div class="ura-chart-inner">${bars}</div></div>
+    </div>
+
+    <!-- Status Máquina -->
+    <div class="ura-sec">
+      <div class="ura-sec-title">Distribuição de Status (THD)</div>
+      <div class="ura-status-grid">${statusHTML}</div>
+    </div>
+
+    <!-- Grupos / Jornada -->
+    ${d.grupos.length > 0 ? `
+    <div class="ura-sec">
+      <div class="ura-sec-title">Jornada da URA — Grupos de Atendimento</div>
+      <div>${gruposHTML}</div>
+    </div>` : ''}
+
+    <!-- Daily Table -->
+    <div class="ura-sec">
+      <div class="ura-sec-title">Daily — Produção por Dia Útil</div>
+      <div class="ura-daily-wrap ura-daily">
+        <table>
+          <thead><tr><th>Data</th><th>Tentativas</th><th>Atendidas</th><th>CPC</th><th>%CPC/Atend</th><th>Conv.</th><th>%Conv/CPC</th></tr></thead>
+          <tbody>${dailyRows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Insights -->
+    <div class="ura-sec">
+      <div class="ura-sec-title">💡 Insights & Pontos de Melhoria</div>
+      <div class="ura-insights">${insightsHTML}</div>
+    </div>
   `;
 }
+
+  window.switchUra = switchUra;
+  // init on first render
+  window._uraInited = false;
+  const _origSwitchApp = window.switchApp;
+  window.switchApp = function(name) {
+    _origSwitchApp(name);
+    if (name === 'ura' && !window._uraInited) {
+      window._uraInited = true;
+      renderUra('fpd15');
+    }
+  };
+})();
 </script>
 </body>
 </html>
