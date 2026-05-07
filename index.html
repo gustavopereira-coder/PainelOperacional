@@ -602,6 +602,10 @@ body { font-family: 'Inter', sans-serif; background: #0d0d0d; color: #ffffff; mi
         <span class="sb-icon">🤖</span>
         <span class="sb-label">URAs<span class="sb-sub">FPD15 · FPD30 · Loc · Onb</span></span>
       </button>
+      <button class="sb-btn" id="sb-alertas" onclick="switchApp('alertas')" title="Alertas">
+        <span class="sb-icon">🚦</span>
+        <span class="sb-label">Alertas<span class="sb-sub">URAs · Discador · Semanal</span></span>
+      </button>
     </nav>
     <div class="dev-credit">
       Desenvolvido por<br>
@@ -2067,5 +2071,349 @@ function renderUra(key) {
   };
 })();
 </script>
+
+<!-- ══ ALERTAS ══ -->
+<div class="app-panel" id="app-alertas">
+<style>
+#app-alertas {
+  font-family:'DM Sans',sans-serif;
+  background:#0d0d0d;
+  min-height:100vh;
+  color:#f3f4f6;
+}
+#app-alertas .al-wrap { max-width:900px; margin:0 auto; padding:32px 28px 80px; }
+#app-alertas .al-page-title { font-size:22px; font-weight:700; letter-spacing:-.5px; margin-bottom:4px; text-align:center; }
+#app-alertas .al-page-sub { font-size:13px; color:#9ca3af; margin-bottom:28px; text-align:center; }
+
+/* Period selector */
+#app-alertas .al-period-row { display:flex; gap:8px; margin-bottom:28px; flex-wrap:wrap; align-items:center; justify-content:center; }
+#app-alertas .al-period-btn {
+  padding:7px 18px; border-radius:8px; font-size:13px; font-weight:500;
+  background:#1a1a1a; border:1px solid rgba(255,255,255,0.1);
+  color:#9ca3af; cursor:pointer; transition:all .15s;
+}
+#app-alertas .al-period-btn:hover { border-color:rgba(255,255,255,0.2); color:#f3f4f6; }
+#app-alertas .al-period-btn.active { background:rgba(20,203,83,0.12); border-color:#14cb53; color:#f3f4f6; }
+#app-alertas .al-period-sep { font-size:11px; color:#4b5563; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+
+/* Section header */
+#app-alertas .al-sec { margin-bottom:40px; }
+#app-alertas .al-sec-hd { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+#app-alertas .al-sec-hd h2 { font-size:15px; font-weight:600; white-space:nowrap; color:#f3f4f6; }
+#app-alertas .al-sec-hd::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.08); }
+
+/* Cards grid */
+#app-alertas .al-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
+
+/* Alert card */
+#app-alertas .al-card {
+  background:#141414; border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px; padding:18px; position:relative; overflow:hidden;
+  text-align:center;
+}
+#app-alertas .al-card-name { font-size:14px; font-weight:600; color:#f3f4f6; margin-bottom:14px; display:flex; align-items:center; justify-content:center; gap:8px; }
+#app-alertas .al-card-icon { font-size:16px; }
+
+/* Metric rows inside card */
+#app-alertas .al-metrics { display:flex; flex-direction:column; gap:10px; }
+#app-alertas .al-metric-row { display:flex; flex-direction:column; align-items:center; gap:6px; }
+#app-alertas .al-metric-label { font-size:12px; color:#9ca3af; font-weight:500; text-align:center; }
+
+/* Status badge selector */
+#app-alertas .al-status-wrap { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; }
+#app-alertas .al-status-btn {
+  font-size:10px; font-weight:600; padding:4px 10px; border-radius:20px; cursor:pointer;
+  border:1.5px solid transparent; transition:all .15s; white-space:nowrap;
+  background:#1a1a1a; color:#6b7280; border-color:#2a2a2a;
+}
+#app-alertas .al-status-btn:hover { opacity:.8; }
+#app-alertas .al-status-btn.sel-green { background:rgba(20,203,83,0.15); color:#14cb53; border-color:rgba(20,203,83,0.4); }
+#app-alertas .al-status-btn.sel-yellow { background:rgba(251,191,36,0.15); color:#fbbf24; border-color:rgba(251,191,36,0.4); }
+#app-alertas .al-status-btn.sel-red { background:rgba(248,113,113,0.15); color:#f87171; border-color:rgba(248,113,113,0.4); }
+#app-alertas .al-status-btn.sel-blue { background:rgba(96,165,250,0.15); color:#60a5fa; border-color:rgba(96,165,250,0.4); }
+#app-alertas .al-status-btn.sel-gray { background:rgba(156,163,175,0.12); color:#9ca3af; border-color:rgba(156,163,175,0.3); }
+
+/* Card top accent bar */
+#app-alertas .al-card[data-worst="green"]  { border-top:3px solid #14cb53; }
+#app-alertas .al-card[data-worst="yellow"] { border-top:3px solid #fbbf24; }
+#app-alertas .al-card[data-worst="red"]    { border-top:3px solid #f87171; }
+#app-alertas .al-card[data-worst="none"]   { border-top:3px solid #2a2a2a; }
+
+/* Summary bar */
+#app-alertas .al-summary {
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:28px;
+}
+#app-alertas .al-sum-card { background:#141414; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px 16px; text-align:center; }
+#app-alertas .al-sum-n { font-size:28px; font-weight:700; font-family:'DM Mono',monospace; letter-spacing:-1px; line-height:1; }
+#app-alertas .al-sum-l { font-size:11px; color:#9ca3af; margin-top:5px; font-weight:500; }
+#app-alertas .al-sum-card.sg .al-sum-n { color:#14cb53; }
+#app-alertas .al-sum-card.sy .al-sum-n { color:#fbbf24; }
+#app-alertas .al-sum-card.sr .al-sum-n { color:#f87171; }
+#app-alertas .al-sum-card.sn .al-sum-n { color:#6b7280; }
+
+/* Save button */
+#app-alertas .al-save-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(20,203,83,0.12); border:1px solid rgba(20,203,83,0.3); color:#14cb53;
+  padding:8px 20px; border-radius:8px; font-size:13px; font-weight:600;
+  cursor:pointer; transition:all .15s; margin-bottom:24px;
+}
+#app-alertas .al-save-btn:hover { background:rgba(20,203,83,0.2); }
+#app-alertas .al-saved-msg { font-size:12px; color:#14cb53; margin-left:10px; opacity:0; transition:opacity .3s; }
+#app-alertas .al-saved-msg.show { opacity:1; }
+
+/* History table */
+#app-alertas .al-hist-wrap { overflow-x:auto; border-radius:10px; border:1px solid rgba(255,255,255,0.08); background:#141414; }
+#app-alertas .al-hist { width:100%; border-collapse:collapse; font-size:12px; min-width:700px; }
+#app-alertas .al-hist th { padding:9px 12px; background:#1a1a1a; color:#9ca3af; font-size:11px; font-weight:600; text-align:left; border-bottom:1px solid rgba(255,255,255,0.08); white-space:nowrap; }
+#app-alertas .al-hist td { padding:9px 12px; border-bottom:1px solid rgba(255,255,255,0.06); font-size:12px; white-space:nowrap; }
+#app-alertas .al-hist tr:last-child td { border-bottom:none; }
+#app-alertas .al-hist tbody tr:hover td { background:#1a1a1a; }
+#app-alertas .al-hist td.ent { color:#f3f4f6; font-weight:500; }
+#app-alertas .hbadge { display:inline-block; font-size:10px; font-weight:600; padding:2px 8px; border-radius:20px; }
+#app-alertas .hbadge.g { background:rgba(20,203,83,0.15); color:#14cb53; }
+#app-alertas .hbadge.y { background:rgba(251,191,36,0.15); color:#fbbf24; }
+#app-alertas .hbadge.r { background:rgba(248,113,113,0.15); color:#f87171; }
+#app-alertas .hbadge.b { background:rgba(96,165,250,0.15); color:#60a5fa; }
+#app-alertas .hbadge.n { background:#1a1a1a; color:#6b7280; }
+</style>
+
+<div class="al-wrap">
+  <div class="al-page-title">🚦 Alertas Operacionais</div>
+  <div class="al-page-sub">URAs · Discadores — lançamento manual por período</div>
+
+  <!-- Period selector -->
+  <div class="al-period-row">
+    <span class="al-period-sep">Mês</span>
+    <button class="al-period-btn active" onclick="alSetPeriod('mar','Março 2026',this)">Março 2026</button>
+    <button class="al-period-btn" onclick="alSetPeriod('abr','Abril 2026',this)">Abril 2026</button>
+    <button class="al-period-btn" onclick="alSetPeriod('mai','Maio 2026',this)">Maio 2026</button>
+    <span class="al-period-sep" style="margin-left:8px;">Semana</span>
+    <button class="al-period-btn" onclick="alSetPeriod('s1','Semana 1',this)">Sem 1</button>
+    <button class="al-period-btn" onclick="alSetPeriod('s2','Semana 2',this)">Sem 2</button>
+    <button class="al-period-btn" onclick="alSetPeriod('s3','Semana 3',this)">Sem 3</button>
+    <button class="al-period-btn" onclick="alSetPeriod('s4','Semana 4',this)">Sem 4</button>
+    <button class="al-period-btn" onclick="alSetPeriod('s5','Semana 5',this)">Sem 5</button>
+  </div>
+
+  <!-- Summary -->
+  <div class="al-summary" id="al-summary">
+    <div class="al-sum-card sg"><div class="al-sum-n" id="al-cnt-g">0</div><div class="al-sum-l">🟢 Green Alert</div></div>
+    <div class="al-sum-card sy"><div class="al-sum-n" id="al-cnt-y">0</div><div class="al-sum-l">🟡 Yellow Alert</div></div>
+    <div class="al-sum-card sr"><div class="al-sum-n" id="al-cnt-r">0</div><div class="al-sum-l">🔴 Red Alert</div></div>
+    <div class="al-sum-card sn"><div class="al-sum-n" id="al-cnt-n">0</div><div class="al-sum-l">⚪ Sem Alerta</div></div>
+  </div>
+
+  <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:24px;"><button class="al-save-btn" onclick="alSave()">💾 Salvar período</button><span class="al-saved-msg" id="al-saved-msg">✓ Salvo!</span></div>
+
+  <!-- URAs -->
+  <div class="al-sec">
+    <div class="al-sec-hd"><h2>🤖 URAs</h2></div>
+    <div class="al-cards" id="al-cards-ura"></div>
+  </div>
+
+  <!-- Discadores -->
+  <div class="al-sec">
+    <div class="al-sec-hd"><h2>📞 Discadores</h2></div>
+    <div class="al-cards" id="al-cards-disc"></div>
+  </div>
+
+  <!-- Histórico -->
+  <div class="al-sec">
+    <div class="al-sec-hd"><h2>📋 Histórico de Alertas</h2></div>
+    <div class="al-hist-wrap">
+      <table class="al-hist">
+        <thead id="al-hist-head"></thead>
+        <tbody id="al-hist-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div><!-- end app-alertas -->
+
+<script>
+(function(){
+// ── CONFIG ──
+const URAS = [
+  { id:'disc_ume',  name:'Discador UME',      icon:'📞', type:'disc',  metrics:['CPC','Conversão'] },
+  { id:'disc_cdc',  name:'Discador CDC',       icon:'📞', type:'disc',  metrics:['CPC','Conversão'] },
+  { id:'fpd30',     name:'FPD30',              icon:'📋', type:'ura',   metrics:['Alô','CPC','Conversão'] },
+  { id:'fpd15',     name:'FPD15',              icon:'📋', type:'ura',   metrics:['Alô','CPC','Conversão'] },
+  { id:'prev_odres',name:'Preventivo Odres',   icon:'🛡️', type:'ura',   metrics:['Alô','CPC','Conversão'] },
+  { id:'prev_ume',  name:'Preventivo UME',     icon:'🛡️', type:'ura',   metrics:['Alô','CPC','Conversão'] },
+  { id:'onb_ume',   name:'Onboarding UME',     icon:'🆕', type:'ura',   metrics:['Alô','CPC','Conversão'] },
+  { id:'onb_odres', name:'Onboarding Odres',   icon:'🆕', type:'ura',   metrics:['Alô','CPC','Conversão'] },
+  { id:'prev_reneg',name:'Preventivo Reneg',   icon:'🔄', type:'ura',   metrics:['Alô','CPC','Conversão'] },
+  { id:'loc_ume',   name:'Localizador UME',    icon:'📍', type:'ura',   metrics:['Alô','CPC','Conversão'] },
+  { id:'loc_odres', name:'Localizador ODres',  icon:'📍', type:'ura',   metrics:['Alô','CPC','Conversão'] },
+];
+
+const STATUS_OPTS = [
+  { key:'green',  label:'🟢 Green',  cls:'sel-green'  },
+  { key:'yellow', label:'🟡 Yellow', cls:'sel-yellow' },
+  { key:'red',    label:'🔴 Red',    cls:'sel-red'    },
+  { key:'blue',   label:'🔵 Desejado',cls:'sel-blue'  },
+  { key:'gray',   label:'⚪ Sem',    cls:'sel-gray'   },
+];
+
+// Storage key
+const SK = 'alertas_v1';
+
+// State: { [period]: { [uraid_metric]: status } }
+let alData = {};
+let curPeriod = 'mar';
+let curPeriodLabel = 'Março 2026';
+
+// Load
+function alLoad() {
+  try { alData = JSON.parse(localStorage.getItem(SK)||'{}'); } catch(e){ alData={}; }
+}
+
+// Save
+function alSave() {
+  try {
+    localStorage.setItem(SK, JSON.stringify(alData));
+    const msg = document.getElementById('al-saved-msg');
+    msg.classList.add('show');
+    setTimeout(()=>msg.classList.remove('show'), 2000);
+  } catch(e){}
+}
+window.alSave = alSave;
+
+function alKey(id, metric) { return id+'__'+metric; }
+
+function getStatus(id, metric) {
+  return (alData[curPeriod]||{})[alKey(id,metric)] || 'gray';
+}
+
+function setStatus(id, metric, val) {
+  if(!alData[curPeriod]) alData[curPeriod] = {};
+  alData[curPeriod][alKey(id,metric)] = val;
+  renderCards();
+  renderSummary();
+  renderHistory();
+}
+
+// Worst status for card accent
+function worstStatus(id, metrics) {
+  const order = ['red','yellow','blue','green','gray'];
+  for(const s of order) {
+    if(metrics.some(m => getStatus(id,m)===s)) return s;
+  }
+  return 'none';
+}
+
+function renderCards() {
+  ['ura','disc'].forEach(type => {
+    const cont = document.getElementById('al-cards-'+type);
+    if(!cont) return;
+    const items = URAS.filter(u=>u.type===type);
+    cont.innerHTML = items.map(u => {
+      const worst = worstStatus(u.id, u.metrics);
+      const metricsHtml = u.metrics.map(m => {
+        const cur = getStatus(u.id, m);
+        const btns = STATUS_OPTS.map(s => {
+          const isSel = cur===s.key;
+          return `<button class="al-status-btn${isSel?' '+s.cls:''}" onclick="alSetStatus('${u.id}','${m}','${s.key}')">${s.label}</button>`;
+        }).join('');
+        return `<div class="al-metric-row">
+          <span class="al-metric-label">${m}</span>
+          <div class="al-status-wrap">${btns}</div>
+        </div>`;
+      }).join('');
+      return `<div class="al-card" data-worst="${worst}">
+        <div class="al-card-name"><span class="al-card-icon">${u.icon}</span>${u.name}</div>
+        <div class="al-metrics">${metricsHtml}</div>
+      </div>`;
+    }).join('');
+  });
+}
+
+function renderSummary() {
+  const counts = {green:0,yellow:0,red:0,gray:0,blue:0};
+  URAS.forEach(u => {
+    u.metrics.forEach(m => {
+      const s = getStatus(u.id,m);
+      counts[s] = (counts[s]||0)+1;
+    });
+  });
+  document.getElementById('al-cnt-g').textContent = counts.green||0;
+  document.getElementById('al-cnt-y').textContent = counts.yellow||0;
+  document.getElementById('al-cnt-r').textContent = counts.red||0;
+  document.getElementById('al-cnt-n').textContent = (counts.gray||0)+(counts.blue||0);
+}
+
+function badgeHtml(s) {
+  const map = {green:'g',yellow:'y',red:'r',blue:'b',gray:'n'};
+  const lbl = {green:'Green',yellow:'Yellow',red:'Red',blue:'Desejado',gray:'Sem'};
+  return `<span class="hbadge ${map[s]||'n'}">${lbl[s]||'—'}</span>`;
+}
+
+function renderHistory() {
+  const periods = Object.keys(alData).filter(p=>Object.keys(alData[p]).length>0);
+  if(!periods.length) {
+    document.getElementById('al-hist-head').innerHTML = '<tr><th>Nenhum dado salvo ainda</th></tr>';
+    document.getElementById('al-hist-body').innerHTML = '';
+    return;
+  }
+  // Build columns: period x metric
+  const allMetrics = [];
+  URAS.forEach(u=>u.metrics.forEach(m=>{
+    const k=u.name+' — '+m;
+    if(!allMetrics.includes(k)) allMetrics.push(k);
+  }));
+
+  const headRow = '<tr><th>Período</th>'+allMetrics.map(m=>`<th>${m}</th>`).join('')+'</tr>';
+  document.getElementById('al-hist-head').innerHTML = headRow;
+
+  const periodLabels = {mar:'Março 2026',abr:'Abril 2026',mai:'Maio 2026',s1:'Semana 1',s2:'Semana 2',s3:'Semana 3',s4:'Semana 4',s5:'Semana 5'};
+  const rows = periods.map(p => {
+    const pLabel = periodLabels[p]||p;
+    const cells = URAS.map(u=>u.metrics.map(m=>{
+      const s = (alData[p]||{})[alKey(u.id,m)]||'gray';
+      return `<td>${badgeHtml(s)}</td>`;
+    }).join('')).join('');
+    return `<tr><td class="ent">${pLabel}</td>${cells}</tr>`;
+  }).join('');
+  document.getElementById('al-hist-body').innerHTML = rows;
+}
+
+window.alSetStatus = function(id, metric, val) {
+  setStatus(id, metric, val);
+};
+
+window.alSetPeriod = function(key, label, btn) {
+  curPeriod = key;
+  curPeriodLabel = label;
+  document.querySelectorAll('#app-alertas .al-period-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards();
+  renderSummary();
+  renderHistory();
+};
+
+// Init
+function initAlertas() {
+  alLoad();
+  renderCards();
+  renderSummary();
+  renderHistory();
+}
+
+// Hook into switchApp
+const _prev = window.switchApp;
+window.switchApp = function(name) {
+  _prev(name);
+  if(name==='alertas') {
+    if(!window._alertasInited) { window._alertasInited=true; initAlertas(); }
+  }
+};
+
+// Also init on load in case user lands here
+initAlertas();
+
+})();
+</script>
+
 </body>
 </html>
